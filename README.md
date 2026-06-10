@@ -175,7 +175,7 @@ MOSFETs (em breve)
 
 ## Por que construí isso
 
-Comecei a estudar programação pelo basicão, frontend, mas sempre quis entender como as coisas funcionam de verdade — hardware, sistemas operacionais, arquitetura. Sempre curti muito robótica, e a SARA nasceu como projeto de aprendizado por conta disso.
+Comecei a estudar programação pelo basicão, frontend, mas sempre quis entender como as coisas funcionam de verdade — hardware, sistemas operacionais, arquitetura. Também sempre curti muito as tecnologias do Tony Stark e, já que eu não consigo fazer a armadura dele ainda, a SARA nasceu como projeto de aprendizado por enquanto.
 
 Do zero: sem experiência prévia em Python, eletrônica ou hardware embarcado.
 
