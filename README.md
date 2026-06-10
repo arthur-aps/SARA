@@ -106,7 +106,7 @@ cp secrets.h.example secrets.h
 # edite com ssid e senha da sua rede
 ````
 
-### Como rodar
+### Rodar o programa
 
 no diretório do projeto:
 
