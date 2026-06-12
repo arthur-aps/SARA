@@ -18,7 +18,8 @@ available_functions = {
     'definir_cor': dispositivos.definir_cor,
     'modo_cinema': dispositivos.modo_cinema,
     'modo_gaming': dispositivos.modo_gaming,
-    'modo_leitura': dispositivos.modo_leitura
+    'modo_leitura': dispositivos.modo_leitura,
+    'granada_de_luz': dispositivos.granada_de_luz,
 }
 
 messages = [
@@ -153,6 +154,19 @@ tools=[
                 'additionalProperties': False
             }
         }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'granada_de_luz',
+            'description': 'Flashbang. Liga a luz do quarto e LEDs no branco total (255, 255, 255).',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
     }
 ]
 
@@ -181,6 +195,7 @@ def processar(texto):
                 return "Desculpe, tive um problema. Pode repetir?"
             continue
 
+        print(response.choices[0].message)
         messages.append(response.choices[0].message)
         content = response.choices[0].message.content
 
@@ -197,13 +212,17 @@ def processar(texto):
                 if tc.function.name in available_functions:
                     args = json.loads(tc.function.arguments)
 
-                    print("Tool:", tc.function.name)
-                    print("Args:", tc.function.arguments)
+                    print("TOOL CALL:")
+                    print(tc.id)
+                    print(tc.function.name)
+                    print(tc.function.arguments)
+
                     result = available_functions[tc.function.name](**args)
 
                     messages.append({
                         'role': 'tool',
                         'tool_call_id': tc.id,
+                        'name': tc.function.name,
                         'content': str(result)
                     })
         else:

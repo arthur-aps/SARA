@@ -34,4 +34,8 @@ def modo_gaming():
 
 def modo_leitura():
     desligar_luz()
-    return definir_cor(255, 255, 200)  # branco quente
+    return definir_cor(255, 200, 200)  # branco quente
+
+def granada_de_luz():
+    ligar_luz()
+    return definir_cor(255, 255, 255) # branco total
