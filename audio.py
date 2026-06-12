@@ -28,6 +28,7 @@ def falar(texto):
 
 # Gravação e transcrição de áudio
 def gravar(audio_file="recordings/request.wav"):
+    subprocess.run(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", "sounds/start-stream.mp3"])
     print("gravando...")
     vad = webrtcvad.Vad(2)  # agressividade 0-3
     audio = pyaudio.PyAudio()
@@ -58,6 +59,7 @@ def gravar(audio_file="recordings/request.wav"):
             if silencio > 50:
                 break
     
+    subprocess.run(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", "sounds/end-stream.mp3"])
     print("fim da gravação.")
     recording = np.frombuffer(b''.join(frames), dtype=np.int16)
     recording = recording.astype(np.float32) / 32768.0
