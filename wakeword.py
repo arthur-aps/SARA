@@ -18,7 +18,7 @@ def aguardar_ativacao():
         chunk = stream.read(1280, exception_on_overflow=False)
         audio_np = np.frombuffer(chunk, dtype=np.int16)
         prediction = modelo_ww.predict(audio_np)
-        if prediction["sarah"] > 0.3 or prediction["hey_sarah"] > 0.3:
+        if prediction["sarah"] > 0.4 or prediction["hey_sarah"] > 0.4:
             stream.stop_stream()
             stream.close()
             audio.terminate()
