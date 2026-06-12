@@ -15,6 +15,10 @@ const int canalR = 0;
 const int canalG = 1;
 const int canalB = 2;
 
+int corR = 0;
+int corG = 0;
+int corB = 0;
+
 DHTesp dhtSensor;
 
 void fadeParaCor(int rAlvo, int gAlvo, int bAlvo, int duracao) {
@@ -27,13 +31,13 @@ void fadeParaCor(int rAlvo, int gAlvo, int bAlvo, int duracao) {
     int bAtual = ledcRead(canalB);
 
     for (int i = 1; i <= passos; i++) {
-        int r = rAtual + (rAlvo - rAtual) * i / passos;
-        int g = gAtual + (gAlvo - gAtual) * i / passos;
-        int b = bAtual + (bAlvo - bAtual) * i / passos;
+        int rPasso = rAtual + (rAlvo - rAtual) * i / passos;
+        int gPasso = gAtual + (gAlvo - gAtual) * i / passos;
+        int bPasso = bAtual + (bAlvo - bAtual) * i / passos;
 
-        ledcWrite(canalR, r);
-        ledcWrite(canalG, g);
-        ledcWrite(canalB, b);
+        ledcWrite(canalR, rPasso);
+        ledcWrite(canalG, gPasso);
+        ledcWrite(canalB, bPasso);
 
         delay(intervalo);
     }
@@ -63,14 +67,17 @@ void handleDesligarLuz() {
 void handleStatus() {
   // Temperatura e umidade
   TempAndHumidity data = dhtSensor.getTempAndHumidity();
+  // Presença
   bool presenca = digitalRead(PRESENCA) == HIGH;
+  // Luz
   bool releStatus = digitalRead(RELE) == LOW; // LOW = ligado
 
   String json = "{";
   json += "\"temperatura\": " + String(data.temperature, 1) + ",";
   json += "\"umidade\": " + String(data.humidity, 1) + ",";
   json += "\"presenca\": " + String(presenca ? "true" : "false") + ",";
-  json += "\"luz\": \"" + String(releStatus ? "ligada" : "desligada") + "\"";
+  json += "\"luz\": \"" + String(releStatus ? "ligada" : "desligada") + "\",";
+  json += "\"corLEDs\": {\"red\": " + String(corR) + ", \"green\": " + String(corG) + ", \"blue\": " + String(corB) + "}";
   json += "}";
   
   server.send(200, "application/json", json);
@@ -91,6 +98,10 @@ void handleDefinirCor() {
 
     Serial.printf("R=%d G=%d B=%d\n", r, g, b);
 
+    corR = r;
+    corG = g;
+    corB = b;
+
     fadeParaCor(r, g, b, 1500);
 
     server.send(200, "text/plain", "Cor alterada com sucesso!");
@@ -106,8 +117,6 @@ void setup() {
   ledcAttachPin(PIN_R, canalR);
   ledcAttachPin(PIN_G, canalG);
   ledcAttachPin(PIN_B, canalB);
-
-  ledcWrite(canalR, 255);
 
   dhtSensor.setup(DHT, DHTesp::DHT22);
 

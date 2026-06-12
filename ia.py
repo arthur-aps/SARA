@@ -1,5 +1,6 @@
 from groq import Groq
 import dispositivos
+from estado import sincronizar_estado
 from dotenv import load_dotenv
 import os
 import json
@@ -11,9 +12,13 @@ groq_model = os.getenv("GROQ_AI_MODEL")
 
 client = Groq(api_key=groq_key)
 
+sincronizar_estado()
+print('Estado do quarto sincronizado.')
+
 available_functions = {
     'ligar_luz': dispositivos.ligar_luz,
     'desligar_luz': dispositivos.desligar_luz,
+    'obter_estado': dispositivos.obter_estado,
     'status': dispositivos.status,
     'definir_cor': dispositivos.definir_cor,
     'modo_cinema': dispositivos.modo_cinema,
@@ -40,8 +45,8 @@ messages = [
         - Em caso de dúvida sobre a intenção, pergunte antes de executar
 
         REGRAS DE CONSULTA
-        - Chame status() sempre que o usuário perguntar sobre temperatura, umidade, presença ou estado dos dispositivos
-        - Não chame status() em saudações ou mensagens casuais
+        - Antes de agir, utilize o estado atual conhecido da casa (obter_estado).
+        - Só chame status() quando o estado estiver desconhecido ou desatualizado.
 
         CONVERSAS CASUAIS
         - Responda brevemente
@@ -81,8 +86,21 @@ tools=[
     {
         'type': 'function',
         'function': {
+            'name': 'obter_estado',
+            'description': 'Obtém o estado atual do quarto, com informações sobre a luz (do quarto e da fita LED), temperatura e umidade',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
             'name': 'status',
-            'description': 'Obtém o estado atual do quarto, com informações sobre a luz (do quarto, não da fita LED), temperatura e umidade',
+            'description': 'Obtém o estado atual do quarto atualizado em tempo real, com uma requisição HTTP. Demora mais que obter_estado, mas é atualizado em tempo real.',
             'parameters': {
                 'type': 'object',
                 'properties': {},

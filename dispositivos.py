@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+from estado import estado
 
 load_dotenv()
 
@@ -20,13 +21,27 @@ def status():
     response = requests.get(f'http://{ESPip}/status')
     return response.json() if response.status_code == 200 else "Falha ao obter status"
 
+def obter_estado():
+    return estado
+
 def definir_cor(red, green, blue):
     response = requests.get(f'http://{ESPip}/cor?r={red}&g={green}&b={blue}')
     return response.text
 
 def modo_cinema():
     desligar_luz()
-    return definir_cor(255, 80, 20)  # laranja quente
+
+    estado["luz"] = "desligada"
+
+    definir_cor(255, 80, 20)  # laranja quente
+
+    estado["corLEDs"] = {
+        "red": 255,
+        "green": 80,
+        "blue": 20
+    }
+
+    return "Modo cinema ativado."
 
 def modo_gaming():
     desligar_luz()
