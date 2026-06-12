@@ -2,6 +2,7 @@ from groq import Groq
 import dispositivos
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -14,6 +15,10 @@ available_functions = {
     'ligar_luz': dispositivos.ligar_luz,
     'desligar_luz': dispositivos.desligar_luz,
     'status': dispositivos.status,
+    'definir_cor': dispositivos.definir_cor,
+    'modo_cinema': dispositivos.modo_cinema,
+    'modo_gaming': dispositivos.modo_gaming,
+    'modo_leitura': dispositivos.modo_leitura
 }
 
 messages = [
@@ -76,7 +81,71 @@ tools=[
         'type': 'function',
         'function': {
             'name': 'status',
-            'description': 'Obtém o estado atual do quarto, com informações sobre a luz, temperatura e umidade',
+            'description': 'Obtém o estado atual do quarto, com informações sobre a luz (do quarto, não da fita LED), temperatura e umidade',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'definir_cor',
+            'description': 'Muda a cor das fitas LED no quarto.',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'red': {
+                        'type': 'number',
+                        'description': 'valor a ser definido da cor vermelha (0 a 255).'
+                    },
+                    'green': {
+                        'type': 'number',
+                        'description': 'valor a ser definido da cor verde (0 a 255).'
+                    },
+                    'blue': {
+                        'type': 'number',
+                        'description': 'valor a ser definido da cor azul (0 a 255).'
+                    }
+                },
+                'required': ['red', 'green', 'blue']
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'modo_cinema',
+            'description': 'Muda a cor das fitas LED para um tom mais cinema (255, 80, 20) e desliga a luz do quarto.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'modo_gaming',
+            'description': 'Muda a cor das fitas LED para vermelho (255, 0, 0) e desliga a luz do quarto.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'modo_leitura',
+            'description': 'Muda a cor das fitas LED para um branco quente (255, 255, 200) e desliga a luz do quarto.',
             'parameters': {
                 'type': 'object',
                 'properties': {},
@@ -126,10 +195,15 @@ def processar(texto):
         if response.choices[0].message.tool_calls:
             for tc in response.choices[0].message.tool_calls:
                 if tc.function.name in available_functions:
-                    result = available_functions[tc.function.name]()
+                    args = json.loads(tc.function.arguments)
+
+                    print("Tool:", tc.function.name)
+                    print("Args:", tc.function.arguments)
+                    result = available_functions[tc.function.name](**args)
+
                     messages.append({
                         'role': 'tool',
-                        'tool_call_id': tc.function.name,
+                        'tool_call_id': tc.id,
                         'content': str(result)
                     })
         else:

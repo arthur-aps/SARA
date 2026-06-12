@@ -19,3 +19,19 @@ def desligar_luz():
 def status():
     response = requests.get(f'http://{ESPip}/status')
     return response.json() if response.status_code == 200 else "Falha ao obter status"
+
+def definir_cor(red, green, blue):
+    response = requests.get(f'http://{ESPip}/cor?r={red}&g={green}&b={blue}')
+    return response.text
+
+def modo_cinema():
+    desligar_luz()
+    return definir_cor(255, 80, 20)  # laranja quente
+
+def modo_gaming():
+    desligar_luz()
+    return definir_cor(255, 0, 0)  # vermelho
+
+def modo_leitura():
+    desligar_luz()
+    return definir_cor(255, 255, 200)  # branco quente

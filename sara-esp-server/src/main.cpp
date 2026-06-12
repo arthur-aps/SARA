@@ -7,10 +7,40 @@
 #define DHT 25
 #define RELE 26
 #define PRESENCA 27
+#define PIN_R 18
+#define PIN_G 19
+#define PIN_B 21
+
+const int canalR = 0;
+const int canalG = 1;
+const int canalB = 2;
 
 DHTesp dhtSensor;
 
+void fadeParaCor(int rAlvo, int gAlvo, int bAlvo, int duracao) {
+    int passos = 50;  // quantidade de passos da transição
+    int intervalo = duracao / passos;
+
+    // lê os valores atuais
+    int rAtual = ledcRead(canalR);
+    int gAtual = ledcRead(canalG);
+    int bAtual = ledcRead(canalB);
+
+    for (int i = 1; i <= passos; i++) {
+        int r = rAtual + (rAlvo - rAtual) * i / passos;
+        int g = gAtual + (gAlvo - gAtual) * i / passos;
+        int b = bAtual + (bAlvo - bAtual) * i / passos;
+
+        ledcWrite(canalR, r);
+        ledcWrite(canalG, g);
+        ledcWrite(canalB, b);
+
+        delay(intervalo);
+    }
+}
+
 WebServer server(80);
+
 
 void handleRoot() {
   server.send(200, "text/plain", "Opa, seja bem-vindo ao módulo de controle da SARA!");
@@ -42,12 +72,42 @@ void handleStatus() {
   json += "\"presenca\": " + String(presenca ? "true" : "false") + ",";
   json += "\"luz\": \"" + String(releStatus ? "ligada" : "desligada") + "\"";
   json += "}";
-
+  
   server.send(200, "application/json", json);
+}
+
+void handleDefinirCor() {
+  if (!server.hasArg("r") ||
+        !server.hasArg("g") ||
+        !server.hasArg("b")) {
+
+        server.send(400, "text/plain", "Parâmetros r, g e b obrigatórios");
+        return;
+    }
+
+    int r = constrain(server.arg("r").toInt(), 0, 255);
+    int g = constrain(server.arg("g").toInt(), 0, 255);
+    int b = constrain(server.arg("b").toInt(), 0, 255);
+
+    Serial.printf("R=%d G=%d B=%d\n", r, g, b);
+
+    fadeParaCor(r, g, b, 1500);
+
+    server.send(200, "text/plain", "Cor alterada com sucesso!");
 }
 
 void setup() {
   Serial.begin(115200);
+
+  ledcSetup(canalR, 5000, 8); // canal, frequência, resolução
+  ledcSetup(canalG, 5000, 8);
+  ledcSetup(canalB, 5000, 8);
+
+  ledcAttachPin(PIN_R, canalR);
+  ledcAttachPin(PIN_G, canalG);
+  ledcAttachPin(PIN_B, canalB);
+
+  ledcWrite(canalR, 255);
 
   dhtSensor.setup(DHT, DHTesp::DHT22);
 
@@ -77,6 +137,7 @@ void setup() {
   server.on("/ligar_luz", handleLigarLuz);
   server.on("/desligar_luz", handleDesligarLuz);
   server.on("/status", handleStatus);
+  server.on("/cor", handleDefinirCor);
   server.onNotFound(handleNotFound);
 
   server.begin();
