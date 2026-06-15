@@ -12,7 +12,16 @@ groq_model = os.getenv("GROQ_AI_MODEL")
 
 client = Groq(api_key=groq_key)
 
-SYSTEM_PROMPT = f"""
+def atualizar_system_prompt():
+    messages[0]["content"] = (
+    SYSTEM_PROMPT_START + 
+    "\n\n" +
+    estado.gerar_contexto_tempo() +
+    "\n\n" +
+    estado.gerar_prompt_estado()
+    )
+
+SYSTEM_PROMPT_START = f"""
     Você é SARA, Sistema de Automação Residencial Autônoma. Controla dispositivos do quarto do Arthur via comandos de voz.
 
     PERSONALIDADE
@@ -81,8 +90,10 @@ available_functions = {
 messages = [
     {
         'role': 'system',
-        'content': SYSTEM_PROMPT + "\n\n" +
-        estado.gerar_contexto_tempo() + "\n\n" +
+        'content': SYSTEM_PROMPT_START +
+        "\n\n" +
+        estado.gerar_contexto_tempo() +
+        "\n\n" +
         estado.gerar_prompt_estado()
     }
 ]
@@ -260,6 +271,7 @@ tools=[
 
 def processar(texto):
     global messages
+    atualizar_system_prompt()
     print(estado.gerar_contexto_tempo())
     
     if len(messages) > 11:
