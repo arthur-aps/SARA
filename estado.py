@@ -13,9 +13,8 @@ dias = {
     "Sunday": "domingo"
 }
 
-agora = datetime.now()
-
 def gerar_contexto_tempo():
+    agora = datetime.now()
     return f"""
     Data atual: {agora.strftime("%d/%m/%Y")}
     Horário atual: {agora.strftime("%H:%M")}
