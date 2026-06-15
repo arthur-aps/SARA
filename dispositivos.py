@@ -11,7 +11,7 @@ ESPip = os.getenv("ESP_IP")
 # aqui é onde se controlam os dispositivos no quarto via requisições HTTP
 
 def ligar_luz():
-    response = requests.get(f'http://{ESPip}/ligar_luz')
+    response = requests.get(f'http://{ESPip}/ligar_luz', timeout=3)
     if response.status_code == 200:
         estado.fisico["luz"] = "ligada"
         return response.text
@@ -19,7 +19,7 @@ def ligar_luz():
         return "Falha ao ligar a luz"
 
 def desligar_luz():
-    response = requests.get(f'http://{ESPip}/desligar_luz')
+    response = requests.get(f'http://{ESPip}/desligar_luz', timeout=3)
     if response.status_code == 200:
         estado.fisico["luz"] = "desligada"
         return response.text
@@ -27,7 +27,7 @@ def desligar_luz():
         return "Falha ao desligar a luz"
 
 def status():
-    response = requests.get(f'http://{ESPip}/status')
+    response = requests.get(f'http://{ESPip}/status', timeout=3)
     if response.status_code == 200:
         estado.fisico.update(response.json())
         estado.atualizar_estado_logico()
@@ -43,7 +43,7 @@ def obter_estado():
     }
 
 def definir_cor(red, green, blue):
-    response = requests.get(f'http://{ESPip}/cor?r={red}&g={green}&b={blue}')
+    response = requests.get(f'http://{ESPip}/cor?r={red}&g={green}&b={blue}', timeout=3)
 
     if response.status_code == 200:
         estado.fisico["corLEDs"] = {
