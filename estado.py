@@ -2,6 +2,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from datetime import datetime
+import time
 
 dias = {
     "Monday": "segunda-feira",
@@ -38,7 +39,7 @@ def atualizar_periodo():
     logico["periodo"] = periodo
 
 meta = {
-    "ultima_sincronizacao": 0 # segundos desde a última sincronização com o servidor
+    "ultima_sincronizacao": 0 # guardará o tempo em que a última sincronização ocorreu
 }
 
 load_dotenv()
@@ -70,6 +71,11 @@ logico = {
 
 def gerar_prompt_estado():
     global meta
+    if meta["ultima_sincronizacao"] == 0:
+        sincronizacao = "nunca"
+    else:
+        segundos = int(time.time() - meta["ultima_sincronizacao"]) # tempo atual - tempo da última sincronização
+        sincronizacao = f"{segundos} segundos atrás"
 
     return f"""
     Estado físico:
@@ -85,7 +91,7 @@ def gerar_prompt_estado():
     - Modo atual: {logico["modo"]}
     - Período atual: {logico["periodo"]}
 
-    Última sincronização dos estados: {meta["ultima_sincronizacao"]} segundos atrás
+    Última sincronização dos estados: {sincronizacao}
     """
 
 def atualizar_estado_logico():
