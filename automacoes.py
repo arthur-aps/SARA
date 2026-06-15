@@ -52,9 +52,11 @@ def verificar_ausencia():
 
 
 def verificar_periodo():
+    periodo_atual = estado.logico["ambiente"]["periodo"]
+    periodo_anterior = estado.logico["ambiente"]["periodo_anterior"]
     if (
         estado.logico["ambiente"]["modo"] == "circadiano" and
-        estado.logico["ambiente"]["periodo_anterior"] != estado.logico["ambiente"]["periodo"]
+        periodo_anterior != periodo_atual
     ):
         dispositivos.modo_circadiano()
-        estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
+        estado.logico["ambiente"]["periodo_anterior"] = periodo_atual
