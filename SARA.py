@@ -34,11 +34,7 @@ def main():
             print(f"Pergunta: {texto}")
             resposta = processar(texto)
             if resposta:
-                threading.Thread(
-                    target=falar,
-                    args=(resposta,),
-                    daemon=True
-                ).start()
+                falar(resposta)
                 print(f"Resposta: {resposta}")
                 # só volta pra wakeword se não terminou com pergunta
                 if not resposta.strip().endswith("?"):
