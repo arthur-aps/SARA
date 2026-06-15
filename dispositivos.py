@@ -97,12 +97,16 @@ def modo_leitura():
     estado.logico["modo"] = "leitura"
     estado.logico["ultima_acao"] = "modo leitura"
 
+    return "Modo leitura ativado."
+
 def modo_sono():
     desligar_luz()
     definir_cor(0, 0, 0) # desliga tudo
 
     estado.logico["modo"] = "sono"
     estado.logico["ultima_acao"] = "modo sono"
+
+    return "Modo sono ativado."
 
 def modo_trabalho():
     ligar_luz()
@@ -111,9 +115,13 @@ def modo_trabalho():
     estado.logico["modo"] = "trabalho"
     estado.logico["ultima_acao"] = "modo trabalho"
 
+    return "Modo trabalho ativado."
+
 def modo_relaxar():
     desligar_luz()
     definir_cor(255, 120, 40) # quente, relaxante
 
     estado.logico["modo"] = "relaxar"
     estado.logico["ultima_acao"] = "modo relaxar"
+
+    return "Modo relaxar ativado."
