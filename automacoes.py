@@ -30,6 +30,10 @@ def verificar_presenca():
             )
             estado.logico["usuario"]["usuario_presente"] = True
             if estado.logico["ambiente"]["modo"] == "sono":
+                print(
+                    "[AUTOMAÇÃO] "
+                    "Saindo do modo sono devido à presença"
+                )
                 dispositivos.modo_circadiano()
             if agora - estado.logico["automacao"]["ultima_saudacao"] > 300:
                 
