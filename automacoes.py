@@ -2,6 +2,7 @@ import time
 import estado
 import dispositivos
 import audio
+import threading
 
 estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
 
