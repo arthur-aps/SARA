@@ -33,7 +33,11 @@ def verificar_presenca():
                 dispositivos.modo_circadiano()
             if agora - estado.logico["automacao"]["ultima_saudacao"] > 300:
                 
-                audio.falar("Bem vindo de volta, Arthur.")
+                threading.Thread(
+                    target=audio.falar,
+                    args=("Bem vindo de volta, Arthur.",),
+                    daemon=True
+                ).start()
                 estado.logico["automacao"]["ultima_saudacao"] = agora
 
 
