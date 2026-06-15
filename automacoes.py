@@ -7,6 +7,8 @@ import threading
 estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
 
 def tick():
+    estado.atualizar_periodo()
+    
     try:
         dispositivos.status()
     except Exception as e:
@@ -61,11 +63,19 @@ def verificar_ausencia():
 
 
 def verificar_periodo():
-    periodo_atual = estado.logico["ambiente"]["periodo"]
-    periodo_anterior = estado.logico["ambiente"]["periodo_anterior"]
-    if (
-        estado.logico["ambiente"]["modo"] == "circadiano" and
-        periodo_anterior != periodo_atual
-    ):
-        dispositivos.modo_circadiano()
-        estado.logico["ambiente"]["periodo_anterior"] = periodo_atual
+    ambiente = estado.logico["ambiente"]
+
+    if ambiente["modo"] != "circadiano":
+        return
+
+    if ambiente["periodo"] == ambiente["periodo_anterior"]:
+        return
+
+    print(
+        f"[AUTOMAÇÃO] Mudança de período: "
+        f"{ambiente['periodo_anterior']} -> {ambiente['periodo']}"
+    )
+
+    dispositivos.modo_circadiano()
+
+    ambiente["periodo_anterior"] = ambiente["periodo"]
