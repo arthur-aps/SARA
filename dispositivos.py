@@ -71,6 +71,11 @@ def modo_circadiano():
         desligar_luz()
         definir_cor(255, 40, 5) # âmbar fraco
 
+    estado.logico["modo"] = "circadiano"
+    estado.logico["ultima_acao"] = "modo circadiano"
+
+    return "Modo circadiano ativado."
+
 
 def modo_cinema():
     desligar_luz()
