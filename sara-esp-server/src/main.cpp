@@ -118,6 +118,8 @@ void setup() {
   ledcAttachPin(PIN_G, canalG);
   ledcAttachPin(PIN_B, canalB);
 
+  fadeParaCor(255, 255, 255, 1500);
+
   dhtSensor.setup(DHT, DHTesp::DHT22);
 
   pinMode(RELE, OUTPUT);

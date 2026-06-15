@@ -1,6 +1,6 @@
 from groq import Groq
 import dispositivos
-from estado import sincronizar_estado
+import estado
 from dotenv import load_dotenv
 import os
 import json
@@ -12,7 +12,55 @@ groq_model = os.getenv("GROQ_AI_MODEL")
 
 client = Groq(api_key=groq_key)
 
-sincronizar_estado()
+SYSTEM_PROMPT = f"""
+    Você é SARA, Sistema de Automação Residencial Autônoma. Controla dispositivos do quarto do Arthur via comandos de voz.
+
+    PERSONALIDADE
+    - Respostas curtas e amigáveis, sempre em português
+    - Senso de humor ocasional, sem exageros
+    - Sem emojis
+
+    REGRAS DE AÇÃO
+    - Se o pedido do usuário for explícito, faça
+    - Se algo já estiver no estado pedido, informe em vez de agir
+    - Você pode decidir a melhor ação para o contexto, pois é autônoma
+    - Em caso de dúvida sobre a intenção, pergunte antes de executar
+
+    REGRAS DE CONSULTA
+    O estado físico e lógico fornecidos no contexto são a fonte principal da verdade.
+    Use essas informações para decidir suas ações.
+    Quando o modo atual estiver definido no estado lógico,
+    considere-o confiável. Não utilize RGB para inferir modos.
+    Só chame status() quando:
+    - algum valor necessário estiver ausente;
+    - houver suspeita de dessincronização;
+    - o usuário pedir explicitamente uma atualização dos sensores.
+
+    CONVERSAS CASUAIS
+    - Responda brevemente
+    - Não ofereça informações não solicitadas
+    - Pode fazer uma piada leve se o contexto permitir
+
+    Existem dois tipos de modos:
+    - Modos automáticos:
+    - modo_circadiano
+
+    - Modos manuais:
+    - modo_cinema
+    - modo_gaming
+    - modo_leitura
+    - modo_sono
+    - modo_trabalho
+    - modo_relaxar
+
+    Quando o usuário pedir uma iluminação adequada ao horário, conforto ou ambiente sem especificar um modo, utilize modo_circadiano.
+
+    Quando o usuário pedir explicitamente um modo, utilize o modo solicitado.
+"""
+
+dispositivos.status()
+estado.atualizar_estado_logico()
+estado.atualizar_periodo()
 print('Estado do quarto sincronizado.')
 
 available_functions = {
@@ -21,38 +69,21 @@ available_functions = {
     'obter_estado': dispositivos.obter_estado,
     'status': dispositivos.status,
     'definir_cor': dispositivos.definir_cor,
+    'modo_circadiano': dispositivos.modo_circadiano,
     'modo_cinema': dispositivos.modo_cinema,
     'modo_gaming': dispositivos.modo_gaming,
     'modo_leitura': dispositivos.modo_leitura,
-    'granada_de_luz': dispositivos.granada_de_luz,
+    'modo_sono': dispositivos.modo_sono,
+    'modo_trabalho': dispositivos.modo_trabalho,
+    'modo_relaxar': dispositivos.modo_relaxar
 }
 
 messages = [
     {
         'role': 'system',
-        'content': f"""
-        Você é SARA, Sistema de Automação Residencial Autônoma. Controla dispositivos do quarto do Arthur via comandos de voz.
-
-        PERSONALIDADE
-        - Respostas curtas, diretas e amigáveis, sempre em português
-        - Senso de humor ocasional, sem exageros
-        - Sem emojis
-
-        REGRAS DE AÇÃO
-        - Só execute ações quando o pedido for explícito ("acende a luz", "apaga a luz", "liga o ar")
-        - Antes de agir, chame status() para verificar o estado atual e evitar ações desnecessárias
-        - Se algo já estiver no estado pedido, informe em vez de agir
-        - Em caso de dúvida sobre a intenção, pergunte antes de executar
-
-        REGRAS DE CONSULTA
-        - Antes de agir, utilize o estado atual conhecido da casa (obter_estado).
-        - Só chame status() quando o estado estiver desconhecido ou desatualizado.
-
-        CONVERSAS CASUAIS
-        - Responda brevemente
-        - Não ofereça informações não solicitadas
-        - Pode fazer uma piada leve se o contexto permitir
-        """
+        'content': SYSTEM_PROMPT + "\n\n" +
+        estado.gerar_contexto_tempo() + "\n\n" +
+        estado.gerar_prompt_estado()
     }
 ]
 
@@ -87,7 +118,7 @@ tools=[
         'type': 'function',
         'function': {
             'name': 'obter_estado',
-            'description': 'Obtém o estado atual do quarto, com informações sobre a luz (do quarto e da fita LED), temperatura e umidade',
+            'description': 'Obtém o estado atual do quarto, com informações sobre a luz (do quarto e da fita LED), temperatura, umidade e presença.',
             'parameters': {
                 'type': 'object',
                 'properties': {},
@@ -137,8 +168,21 @@ tools=[
     {
         'type': 'function',
         'function': {
+            'name': 'modo_circadiano',
+            'description': 'Muda a luz do quarto e cor das fitas LED para um tom confortável específico para o período atual.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
             'name': 'modo_cinema',
-            'description': 'Muda a cor das fitas LED para um tom mais cinema (255, 80, 20) e desliga a luz do quarto.',
+            'description': 'Muda a cor das fitas LED para um tom mais cinema e desliga a luz do quarto.',
             'parameters': {
                 'type': 'object',
                 'properties': {},
@@ -151,7 +195,7 @@ tools=[
         'type': 'function',
         'function': {
             'name': 'modo_gaming',
-            'description': 'Muda a cor das fitas LED para vermelho (255, 0, 0) e desliga a luz do quarto.',
+            'description': 'Muda a cor das fitas LED para vermelho e desliga a luz do quarto.',
             'parameters': {
                 'type': 'object',
                 'properties': {},
@@ -164,7 +208,7 @@ tools=[
         'type': 'function',
         'function': {
             'name': 'modo_leitura',
-            'description': 'Muda a cor das fitas LED para um branco quente (255, 255, 200) e desliga a luz do quarto.',
+            'description': 'Muda a cor das fitas LED para um branco quente e desliga a luz do quarto.',
             'parameters': {
                 'type': 'object',
                 'properties': {},
@@ -176,8 +220,34 @@ tools=[
     {
         'type': 'function',
         'function': {
-            'name': 'granada_de_luz',
-            'description': 'Flashbang. Liga a luz do quarto e LEDs no branco total (255, 255, 255).',
+            'name': 'modo_sono',
+            'description': 'Muda a cor das fitas LED para tudo apagado e desliga a luz do quarto.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'modo_trabalho',
+            'description': 'Liga a luz do quarto e deixa os LEDs no branco total.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+                'additionalProperties': False
+            }
+        }
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'modo_relaxar',
+            'description': 'desliga a luz do quarto e deixa os LEDs num tom quente relaxante.',
             'parameters': {
                 'type': 'object',
                 'properties': {},
@@ -190,6 +260,7 @@ tools=[
 
 def processar(texto):
     global messages
+    print(estado.gerar_contexto_tempo())
     
     if len(messages) > 11:
         messages = messages[:1] + messages[-10:] # memória de no máximo 10 mensagens (e o system prompt), pra não viajar demais na maionese
