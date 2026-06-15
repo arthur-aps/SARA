@@ -35,7 +35,6 @@ def status():
         return response.json()
     else:
         return "Falha ao obter status"
-    return response.json() if response.status_code == 200 else "Falha ao obter status"
 
 def obter_estado():
     return {
