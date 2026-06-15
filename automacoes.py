@@ -24,13 +24,14 @@ def verificar_presenca():
 
         if not estado.logico["usuario_presente"]:
             print(
-                f"[AUTOMAÇÃO] Usuário presente. Modo={estado.logico['modo']}"
+                f"[AUTOMAÇÃO] Usuário presente, ativando modo circadiano..."
             )
+            dispositivos.modo_circadiano()
             estado.logico["usuario_presente"] = True
 
             if agora - estado.logico["ultima_saudacao"] > 300:
                 
-                audio.falar("Oi, Arthur.")
+                audio.falar("Bem vindo de volta, Arthur.")
                 estado.logico["ultima_saudacao"] = agora
 
 
