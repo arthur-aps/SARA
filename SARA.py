@@ -35,8 +35,8 @@ def main():
             resposta = processar(texto)
             if resposta:
                 threading.Thread(
-                    target=audio.falar,
-                    args=(resposta),
+                    target=falar,
+                    args=(resposta,),
                     daemon=True
                 ).start()
                 print(f"Resposta: {resposta}")
