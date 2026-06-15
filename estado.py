@@ -59,7 +59,7 @@ fisico = {
 }
 
 logico = {
-    "modo": "sono",
+    "modo": "circadiano",
     "ocupado": False,
     "ultima_acao": "nenhuma",
     "usuario_presente": False,
