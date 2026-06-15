@@ -164,7 +164,7 @@ MOSFETs (em breve)
 - [x] Transcrição de voz local (Whisper)
 - [x] Palavra de ativação
 - [x] Síntese de voz
-- [ ] Controle de fita LED RGB
+- [x] Controle de fita LED RGB
 - [ ] Controle do ar condicionado (IR)
 - [ ] Modos de iluminação dos LEDs (cinema, gaming, leitura)
 - [ ] Sincronização de LEDs com voz da SARA
