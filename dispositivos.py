@@ -62,7 +62,7 @@ def modo_circadiano():
         desligar_luz()
         definir_cor(255, 124, 38) # quente suave
     elif estado.logico["periodo"] == "tarde":
-        ligar_luz()
+        desligar_luz()
         definir_cor(255, 255, 255) # claro
     elif estado.logico["periodo"] == "tarde_para_noite":
         desligar_luz()
