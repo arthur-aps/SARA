@@ -36,7 +36,7 @@ def atualizar_periodo():
     else:
         periodo = "madrugada"
 
-    logico["periodo"] = periodo
+    logico["ambiente"]["periodo"] = periodo
 
 meta = {
     "ultima_sincronizacao": 0 # guardará o tempo em que a última sincronização ocorreu
@@ -59,17 +59,25 @@ fisico = {
 }
 
 logico = {
-    "modo": "circadiano",
-    "ocupado": False,
-    "ultima_acao": "nenhuma",
-    "usuario_presente": False,
-    "ultima_presenca": 0,
-    "tempo_sem_presenca": 0,
-    "ultima_saudacao": 0,
-    "temperatura_confortavel": True,
-    "necessita_ventilacao": False,
-    "periodo": "desconhecido",
-    "modo_sono_automatico": False,
+    "usuario": {
+        "usuario_presente": False,
+        "ultima_presenca": 0,
+        "tempo_sem_presenca": 0,
+    },
+
+    "automacao": {
+        "modo_sono_automatico": False,
+        "ultima_saudacao": 0, 
+    },
+
+    "ambiente": {
+        "modo": "circadiano",
+        "ultima_acao": "nenhuma",
+        "temperatura_confortavel": True,
+        "necessita_ventilacao": False,
+        "periodo": "desconhecido",
+        "periodo_anterior": "desconhecido",
+    },
 }
 
 def gerar_prompt_estado():
@@ -91,8 +99,8 @@ def gerar_prompt_estado():
     - Temperatura: {fisico["temperatura"]}°C
 
     Estado lógico:
-    - Modo atual: {logico["modo"]}
-    - Período atual: {logico["periodo"]}
+    - Modo atual: {logico["ambiente"]["modo"]}
+    - Período atual: {logico["ambiente"]["periodo"]}
 
     Última sincronização dos estados: {sincronizacao}
     """
@@ -109,7 +117,7 @@ def atualizar_estado_logico():
         rgb["blue"] == 20 and
         fisico["luz"] == "desligada"
     ):
-        logico["modo"] = "cinema"
+        logico["ambiente"]["modo"] = "cinema"
 
     elif (
         rgb["red"] == 255 and
@@ -117,7 +125,7 @@ def atualizar_estado_logico():
         rgb["blue"] == 0 and
         fisico["luz"] == "desligada"
     ):
-        logico["modo"] = "gaming"
+        logico["ambiente"]["modo"] = "gaming"
 
     elif (
         rgb["red"] == 255 and
@@ -125,7 +133,7 @@ def atualizar_estado_logico():
         rgb["blue"] == 200 and
         fisico["luz"] == "desligada"
     ):
-        logico["modo"] = "leitura"
+        logico["ambiente"]["modo"] = "leitura"
 
     elif (
         rgb["red"] == 0 and
@@ -133,7 +141,7 @@ def atualizar_estado_logico():
         rgb["blue"] == 0 and
         fisico["luz"] == "desligada"
     ):
-        logico["modo"] = "sono"
+        logico["ambiente"]["modo"] = "sono"
 
     elif (
         rgb["red"] == 255 and
@@ -141,7 +149,7 @@ def atualizar_estado_logico():
         rgb["blue"] == 255 and
         fisico["luz"] == "ligada"
     ):
-        logico["modo"] = "luz_total"
+        logico["ambiente"]["modo"] = "luz_total"
 
     else:
-        logico["modo"] = "personalizado"
+        logico["ambiente"]["modo"] = "personalizado"

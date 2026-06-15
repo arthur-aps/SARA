@@ -58,21 +58,21 @@ def definir_cor(red, green, blue):
         return "Falha ao definir cor dos LEDs"
 
 def modo_circadiano():
-    if estado.logico["periodo"] == "manha":
+    if estado.logico["ambiente"]["periodo"] == "manha":
         desligar_luz()
         definir_cor(255, 124, 38) # quente suave
-    elif estado.logico["periodo"] == "tarde":
+    elif estado.logico["ambiente"]["periodo"] == "tarde":
         desligar_luz()
         definir_cor(255, 255, 255) # claro
-    elif estado.logico["periodo"] == "tarde_para_noite":
+    elif estado.logico["ambiente"]["periodo"] == "tarde_para_noite":
         desligar_luz()
         definir_cor(255, 108, 24) # quente
     else:
         desligar_luz()
         definir_cor(255, 40, 5) # âmbar fraco
 
-    estado.logico["modo"] = "circadiano"
-    estado.logico["ultima_acao"] = "modo circadiano"
+    estado.logico["ambiente"]["modo"] = "circadiano"
+    estado.logico["ambiente"]["ultima_acao"] = "modo circadiano"
 
     return "Modo circadiano ativado."
 
@@ -81,8 +81,8 @@ def modo_cinema():
     desligar_luz()
     definir_cor(255, 80, 20)  # laranja quente
 
-    estado.logico["modo"] = "cinema"
-    estado.logico["ultima_acao"] = "modo cinema"
+    estado.logico["ambiente"]["modo"] = "cinema"
+    estado.logico["ambiente"]["ultima_acao"] = "modo cinema"
 
     return "Modo cinema ativado."
 
@@ -90,8 +90,8 @@ def modo_gaming():
     desligar_luz()
     definir_cor(255, 0, 0)  # vermelho
 
-    estado.logico["modo"] = "gaming"
-    estado.logico["ultima_acao"] = "modo gaming"
+    estado.logico["ambiente"]["modo"] = "gaming"
+    estado.logico["ambiente"]["ultima_acao"] = "modo gaming"
 
     return "Modo gaming ativado."
 
@@ -99,8 +99,8 @@ def modo_leitura():
     desligar_luz()
     definir_cor(255, 200, 200)  # branco quente
 
-    estado.logico["modo"] = "leitura"
-    estado.logico["ultima_acao"] = "modo leitura"
+    estado.logico["ambiente"]["modo"] = "leitura"
+    estado.logico["ambiente"]["ultima_acao"] = "modo leitura"
 
     return "Modo leitura ativado."
 
@@ -108,8 +108,8 @@ def modo_sono():
     desligar_luz()
     definir_cor(0, 0, 0) # desliga tudo
 
-    estado.logico["modo"] = "sono"
-    estado.logico["ultima_acao"] = "modo sono"
+    estado.logico["ambiente"]["modo"] = "sono"
+    estado.logico["ambiente"]["ultima_acao"] = "modo sono"
 
     return "Modo sono ativado."
 
@@ -117,8 +117,8 @@ def modo_trabalho():
     ligar_luz()
     definir_cor(255, 255, 255) # branco total
 
-    estado.logico["modo"] = "trabalho"
-    estado.logico["ultima_acao"] = "modo trabalho"
+    estado.logico["ambiente"]["modo"] = "trabalho"
+    estado.logico["ambiente"]["ultima_acao"] = "modo trabalho"
 
     return "Modo trabalho ativado."
 
@@ -126,7 +126,7 @@ def modo_relaxar():
     desligar_luz()
     definir_cor(255, 120, 40) # quente, relaxante
 
-    estado.logico["modo"] = "relaxar"
-    estado.logico["ultima_acao"] = "modo relaxar"
+    estado.logico["ambiente"]["modo"] = "relaxar"
+    estado.logico["ambiente"]["ultima_acao"] = "modo relaxar"
 
     return "Modo relaxar ativado."

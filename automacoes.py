@@ -3,6 +3,7 @@ import estado
 import dispositivos
 import audio
 
+estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
 
 def tick():
     try:
@@ -13,37 +14,47 @@ def tick():
 
     verificar_presenca()
     verificar_ausencia()
+    verificar_periodo()
 
 
 def verificar_presenca():
     agora = time.time()
 
     if estado.fisico["presenca"]:
-        estado.logico["ultima_presenca"] = agora
-        estado.logico["modo_sono_automatico"] = False
+        estado.logico["usuario"]["ultima_presenca"] = agora
+        estado.logico["automacao"]["modo_sono_automatico"] = False
 
-        if not estado.logico["usuario_presente"]:
+        if not estado.logico["usuario"]["usuario_presente"]:
             print(
                 f"[AUTOMAÇÃO] Usuário presente, ativando modo circadiano..."
             )
-            dispositivos.modo_circadiano()
-            estado.logico["usuario_presente"] = True
-
-            if agora - estado.logico["ultima_saudacao"] > 300:
+            estado.logico["usuario"]["usuario_presente"] = True
+            if estado.logico["ambiente"]["modo"] == "sono":
+                dispositivos.modo_circadiano()
+            if agora - estado.logico["automacao"]["ultima_saudacao"] > 300:
                 
                 audio.falar("Bem vindo de volta, Arthur.")
-                estado.logico["ultima_saudacao"] = agora
+                estado.logico["automacao"]["ultima_saudacao"] = agora
 
 
 def verificar_ausencia():
-    tempo_ausente = time.time() - estado.logico["ultima_presenca"]
-    estado.logico["tempo_sem_presenca"] = tempo_ausente
+    tempo_ausente = time.time() - estado.logico["usuario"]["ultima_presenca"]
+    estado.logico["usuario"]["tempo_sem_presenca"] = tempo_ausente
 
-    if tempo_ausente > 60 and estado.logico["usuario_presente"]:
+    if tempo_ausente > 60 and estado.logico["usuario"]["usuario_presente"]:
         print("[AUTOMAÇÃO] Usuário ausente")
-        estado.logico["usuario_presente"] = False
+        estado.logico["usuario"]["usuario_presente"] = False
 
-    if tempo_ausente > 900 and not estado.logico["modo_sono_automatico"]: # 15 min de ausência
+    if tempo_ausente > 900 and not estado.logico["automacao"]["modo_sono_automatico"]: # 15 min de ausência
         print("[AUTOMAÇÃO] Sem presença há mais de 15 minutos, ativando modo sono...")
         dispositivos.modo_sono()
-        estado.logico["modo_sono_automatico"] = True
+        estado.logico["automacao"]["modo_sono_automatico"] = True
+
+
+def verificar_periodo():
+    if (
+        estado.logico["ambiente"]["modo"] == "circadiano" and
+        estado.logico["ambiente"]["periodo_anterior"] != estado.logico["ambiente"]["periodo"]
+    ):
+        dispositivos.modo_circadiano()
+        estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
