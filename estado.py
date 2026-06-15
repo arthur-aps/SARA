@@ -63,10 +63,13 @@ logico = {
     "ocupado": False,
     "ultima_acao": "nenhuma",
     "usuario_presente": False,
+    "ultima_presenca": 0,
     "tempo_sem_presenca": 0,
+    "ultima_saudacao": 0,
     "temperatura_confortavel": True,
     "necessita_ventilacao": False,
-    "periodo": "desconhecido"
+    "periodo": "desconhecido",
+    "modo_sono_automatico": False,
 }
 
 def gerar_prompt_estado():
