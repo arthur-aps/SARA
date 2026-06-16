@@ -129,12 +129,11 @@ ESP32
 
 Fita LED RGB (em breve)
 ├── V+  → Fonte 12V (+)
-├── R   → MOSFET 1 (OUT+)
-├── G   → MOSFET 2 (OUT+)
-└── B   → MOSFET 3 (OUT+)
+├── R   → MOSFET 1 (OUT-)
+├── G   → MOSFET 2 (OUT-)
+└── B   → MOSFET 3 (OUT-)
 
-MOSFETs (em breve)
-├── VIN+/VIN- → Fonte 12V
+MOSFETs
 ├── OUT-      → GND compartilhado
 └── TRIG/PWM  → ESP32 pinos 18, 19, 21
 ```
