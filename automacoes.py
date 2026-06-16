@@ -4,11 +4,10 @@ import dispositivos
 import audio
 import threading
 
-estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
-
 def tick():
+    estado.logico["ambiente"]["periodo_anterior"] = estado.logico["ambiente"]["periodo"]
     estado.atualizar_periodo()
-    
+
     try:
         dispositivos.status()
     except Exception as e:
@@ -29,13 +28,17 @@ def verificar_presenca():
 
         if not estado.logico["usuario"]["usuario_presente"]:
             print(
-                f"[AUTOMAÇÃO] Usuário presente, ativando modo circadiano..."
+                f"[AUTOMAÇÃO] Usuário presente."
             )
             estado.logico["usuario"]["usuario_presente"] = True
-            if estado.logico["ambiente"]["modo"] == "sono":
+
+            if (
+                estado.logico["ambiente"]["modo"] == "sono" or
+                estado.logico["ambiente"]["modo"] == "circadiano"
+            ):
                 print(
                     "[AUTOMAÇÃO] "
-                    "Saindo do modo sono devido à presença"
+                    "Ativando modo circadiano"
                 )
                 dispositivos.modo_circadiano()
             if agora - estado.logico["automacao"]["ultima_saudacao"] > 300:
@@ -52,7 +55,7 @@ def verificar_ausencia():
     tempo_ausente = time.time() - estado.logico["usuario"]["ultima_presenca"]
     estado.logico["usuario"]["tempo_sem_presenca"] = tempo_ausente
 
-    if tempo_ausente > 60 and estado.logico["usuario"]["usuario_presente"]:
+    if tempo_ausente > 300 and estado.logico["usuario"]["usuario_presente"]:
         print("[AUTOMAÇÃO] Usuário ausente")
         estado.logico["usuario"]["usuario_presente"] = False
 
