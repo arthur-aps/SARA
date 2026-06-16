@@ -41,7 +41,7 @@ def verificar_presenca():
                     "Ativando modo circadiano"
                 )
                 dispositivos.modo_circadiano()
-            if agora - estado.logico["automacao"]["ultima_saudacao"] > 300:
+            if agora - estado.logico["automacao"]["ultima_saudacao"] > 600: # 10 min desde a última saudação
                 
                 threading.Thread(
                     target=audio.falar,
@@ -55,7 +55,7 @@ def verificar_ausencia():
     tempo_ausente = time.time() - estado.logico["usuario"]["ultima_presenca"]
     estado.logico["usuario"]["tempo_sem_presenca"] = tempo_ausente
 
-    if tempo_ausente > 300 and estado.logico["usuario"]["usuario_presente"]:
+    if tempo_ausente > 300 and estado.logico["usuario"]["usuario_presente"]: # 5 min de ausência dá como usuário ausente
         print("[AUTOMAÇÃO] Usuário ausente")
         estado.logico["usuario"]["usuario_presente"] = False
 
