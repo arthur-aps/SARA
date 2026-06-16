@@ -59,7 +59,11 @@ def verificar_ausencia():
         print("[AUTOMAÇÃO] Usuário ausente")
         estado.logico["usuario"]["usuario_presente"] = False
 
-    if tempo_ausente > 900 and not estado.logico["automacao"]["modo_sono_automatico"]: # 15 min de ausência
+    if (
+        tempo_ausente > 900 and
+        not estado.logico["automacao"]["modo_sono_automatico"] and
+        not estado.logico["modo"]["cinema"]
+    ): # 15 min de ausência entra no modo sono, exceto se estava no modo cinema
         print("[AUTOMAÇÃO] Sem presença há mais de 15 minutos, ativando modo sono...")
         dispositivos.modo_sono()
         estado.logico["automacao"]["modo_sono_automatico"] = True
