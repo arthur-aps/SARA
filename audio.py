@@ -10,6 +10,9 @@ import numpy as np
 import webrtcvad
 import collections
 
+REQUEST_PATH = "recordings/request.wav"
+RESPONSE_PATH = "recordings/response.mp3"
+
 modeloWhisper = WhisperModel("small", device="cpu", compute_type="int8")
 duration = 5  # seconds
 fs = 16000  # sample rate
@@ -18,7 +21,7 @@ sd.default.channels = 1
 sd.default.dtype = 'float32'
 
 # Text to Speech da SARA, usando a voz "pt-BR-FranciscaNeural" do Microsoft Edge
-async def falar_async(texto, audio_file="recordings/response.mp3"):
+async def falar_async(texto, audio_file=RESPONSE_PATH):
     communicate = edge_tts.Communicate(texto, voice="pt-BR-FranciscaNeural")
     await communicate.save(audio_file)
     subprocess.run(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", audio_file])
@@ -27,7 +30,7 @@ def falar(texto):
     asyncio.run(falar_async(texto))
 
 # Gravação e transcrição de áudio
-def gravar(audio_file="recordings/request.wav"):
+def gravar(audio_file=REQUEST_PATH):
     subprocess.run(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", "sounds/start-stream.mp3"])
     print("gravando...")
     vad = webrtcvad.Vad(2)  # agressividade 0-3
