@@ -30,7 +30,6 @@ def status():
     response = requests.get(f'http://{ESPip}/status', timeout=3)
     if response.status_code == 200:
         estado.fisico.update(response.json())
-        estado.atualizar_estado_logico()
         estado.meta["ultima_sincronizacao"] = time.time()
         return response.json()
     else:
