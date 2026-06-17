@@ -1,6 +1,7 @@
 from audio import gravar, transcrever, falar
 from ia import processar
 from wakeword import aguardar_ativacao
+import estado
 import time
 import threading
 import automacoes
@@ -23,6 +24,7 @@ threading.Thread(
 
 
 def main():
+    estado.carregar()
     while True:
         aguardar_ativacao()
         

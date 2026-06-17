@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 recordings/
 SARA-testes/
+estado_logico.json

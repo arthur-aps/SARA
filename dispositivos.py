@@ -72,6 +72,7 @@ def modo_circadiano():
 
     estado.logico["ambiente"]["modo"] = "circadiano"
     estado.logico["ambiente"]["ultima_acao"] = "modo circadiano"
+    estado.salvar()
 
     return "Modo circadiano ativado."
 
@@ -82,6 +83,7 @@ def modo_cinema():
 
     estado.logico["ambiente"]["modo"] = "cinema"
     estado.logico["ambiente"]["ultima_acao"] = "modo cinema"
+    estado.salvar()
 
     return "Modo cinema ativado."
 
@@ -91,6 +93,7 @@ def modo_gaming():
 
     estado.logico["ambiente"]["modo"] = "gaming"
     estado.logico["ambiente"]["ultima_acao"] = "modo gaming"
+    estado.salvar()
 
     return "Modo gaming ativado."
 
@@ -100,6 +103,7 @@ def modo_leitura():
 
     estado.logico["ambiente"]["modo"] = "leitura"
     estado.logico["ambiente"]["ultima_acao"] = "modo leitura"
+    estado.salvar()
 
     return "Modo leitura ativado."
 
@@ -109,6 +113,7 @@ def modo_sono():
 
     estado.logico["ambiente"]["modo"] = "sono"
     estado.logico["ambiente"]["ultima_acao"] = "modo sono"
+    estado.salvar()
 
     return "Modo sono ativado."
 
@@ -118,6 +123,7 @@ def modo_trabalho():
 
     estado.logico["ambiente"]["modo"] = "trabalho"
     estado.logico["ambiente"]["ultima_acao"] = "modo trabalho"
+    estado.salvar()
 
     return "Modo trabalho ativado."
 
@@ -127,5 +133,6 @@ def modo_relaxar():
 
     estado.logico["ambiente"]["modo"] = "relaxar"
     estado.logico["ambiente"]["ultima_acao"] = "modo relaxar"
+    estado.salvar()
 
     return "Modo relaxar ativado."

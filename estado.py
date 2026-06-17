@@ -3,6 +3,15 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 import time
+import json
+from pathlib import Path
+
+
+load_dotenv()
+
+ESPip = os.getenv("ESP_IP")
+
+SAVE_PATH = Path("estado_logico.json")
 
 dias = {
     "Monday": "segunda-feira",
@@ -14,37 +23,9 @@ dias = {
     "Sunday": "domingo"
 }
 
-def gerar_contexto_tempo():
-    agora = datetime.now()
-    return f"""
-    Data atual: {agora.strftime("%d/%m/%Y")}
-    Horário atual: {agora.strftime("%H:%M")}
-    Dia da semana: {dias[agora.strftime("%A")]}
-    """
-
-def atualizar_periodo():
-    hora = datetime.now().hour
-
-    if 5 <= hora < 12:
-        periodo = "manha"
-    elif 12 <= hora < 18:
-        periodo = "tarde"
-    elif 18 <= hora < 20:
-        periodo = "tarde_para_noite"
-    elif 20 <= hora:
-        periodo = "noite"
-    else:
-        periodo = "madrugada"
-
-    logico["ambiente"]["periodo"] = periodo
-
 meta = {
-    "ultima_sincronizacao": 0 # guardará o tempo em que a última sincronização ocorreu
+    "ultima_sincronizacao": 0 # momento da última sincronização dos dados
 }
-
-load_dotenv()
-
-ESPip = os.getenv("ESP_IP") 
 
 fisico = {
     "temperatura": None,
@@ -57,7 +38,6 @@ fisico = {
         "blue": 0,
     },
 }
-
 logico = {
     "usuario": {
         "usuario_presente": False,
@@ -79,6 +59,33 @@ logico = {
         "periodo_anterior": "desconhecido",
     },
 }
+
+
+def gerar_contexto_tempo():
+    agora = datetime.now()
+    return f"""
+    Data atual: {agora.strftime("%d/%m/%Y")}
+    Horário atual: {agora.strftime("%H:%M")}
+    Dia da semana: {dias[agora.strftime("%A")]}
+    """
+
+
+def atualizar_periodo():
+    hora = datetime.now().hour
+
+    if 5 <= hora < 12:
+        periodo = "manha"
+    elif 12 <= hora < 18:
+        periodo = "tarde"
+    elif 18 <= hora < 20:
+        periodo = "tarde_para_noite"
+    elif 20 <= hora:
+        periodo = "noite"
+    else:
+        periodo = "madrugada"
+
+    logico["ambiente"]["periodo"] = periodo
+
 
 def gerar_prompt_estado():
     global meta
@@ -104,6 +111,7 @@ def gerar_prompt_estado():
 
     Última sincronização dos estados: {sincronizacao}
     """
+
 
 def atualizar_estado_logico():
     global fisico
@@ -153,3 +161,26 @@ def atualizar_estado_logico():
 
     else:
         logico["ambiente"]["modo"] = "personalizado"
+
+    
+def salvar():
+    with SAVE_PATH.open("w", encoding="utf-8") as f:
+        json.dump(exportar(), f, indent=4, ensure_ascii=False)
+
+
+def carregar():
+    if not SAVE_PATH.exists():
+        return
+
+    with SAVE_PATH.open("r", encoding="utf-8") as f:
+        dados = json.load(f)
+
+    logico["ambiente"].update(dados["ambiente"])
+
+
+def exportar():
+    return {
+        "ambiente": {
+            "modo": logico["ambiente"]["modo"],
+        }
+    }
