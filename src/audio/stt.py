@@ -1,0 +1,100 @@
+import subprocess
+
+import numpy as np
+import pyaudio
+import soundfile as sf
+import webrtcvad
+
+from config.paths import SOUNDS
+
+from faster_whisper import WhisperModel
+
+from eventos import Evento
+
+
+class STT:
+
+    def __init__(self, fila, mic):
+        self.fs = 16000
+        self.modelo = WhisperModel(
+            "small",
+            device="cpu",
+            compute_type="int8"
+        )
+        self.vad = webrtcvad.Vad(2)
+        self.audio = pyaudio.PyAudio()
+        self.fila = fila
+        self.mic = mic
+
+    def gravar(self, arquivo):
+
+        subprocess.run([
+            "ffplay",
+            "-nodisp",
+            "-autoexit",
+            "-loglevel",
+            "quiet",
+            str(SOUNDS / "start-stream.mp3")
+        ])
+
+        print("gravando...")
+        self.fila.put(Evento.FALA_USUARIO_INICIADA)
+
+        frames = []
+
+        silencio = 0
+        falando = False
+
+        while True:
+
+            chunk = self.mic.ler(self.mic.chunk_vad)
+
+            is_speech = self.vad.is_speech(chunk, self.fs)
+
+            if is_speech:
+                falando = True
+                silencio = 0
+                frames.append(chunk)
+
+            elif falando:
+
+                silencio += 1
+                frames.append(chunk)
+
+                if silencio > 50:
+                    break
+
+        subprocess.run([
+            "ffplay",
+            "-nodisp",
+            "-autoexit",
+            "-loglevel",
+            "quiet",
+            str(SOUNDS / "end-stream.mp3")
+        ])
+
+        print("fim da gravação.")
+        self.fila.put(Evento.FALA_USUARIO_FINALIZADA)
+
+        recording = np.frombuffer(
+            b"".join(frames),
+            dtype=np.int16
+        )
+
+        recording = recording.astype(np.float32) / 32768.0
+
+        sf.write(arquivo, recording, self.fs)
+
+        self.fila.put(Evento.FALA_USUARIO_ARQUIVADA)
+        return arquivo
+
+    def transcrever(self, audio):
+
+        segments, info = self.modelo.transcribe(
+            audio,
+            language="pt",
+            vad_filter=True
+        )
+
+        self.fila.put(Evento.FALA_USUARIO_TRANSCRITA)
+        return " ".join(segment.text for segment in segments)
