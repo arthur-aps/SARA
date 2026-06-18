@@ -1,5 +1,36 @@
 from enum import Enum, auto
+from dataclasses import dataclass
 
+
+@dataclass
+class MicGravacaoIniciada:
+    pass
+
+@dataclass
+class MicGravacaoEncerrada:
+    pass
+
+
+@dataclass
+class Wakeword:
+    pass
+
+
+@dataclass
+class FalaUsuarioArquivada:
+    caminho: Path
+
+@dataclass
+class TextoTranscrito:
+    caminho: Path
+
+@dataclass
+class IaRespondeu:
+    resposta: str
+
+@dataclass
+class TTSTerminado:
+    pass
 
 class Evento(Enum):
 

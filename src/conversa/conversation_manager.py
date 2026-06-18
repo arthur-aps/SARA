@@ -1,7 +1,6 @@
 import time
 
 from eventos import Evento, Estado
-from config.paths import RECORDINGS
 
 
 class ConversationManager:
@@ -15,39 +14,40 @@ class ConversationManager:
         self.estado = Estado.ESPERA
 
     def processar(self, evento):
-        match evento:
+        match (self.estado, evento):
 
-            case Evento.MIC_GRAVACAO_INICIADA:
+            case (Estado.ESPERA, Evento.MIC_GRAVACAO_INICIADA):
                 print("[ConversationManager] Gravação iniciada")
+                return
 
-            case Evento.WAKEWORD:
+            case (Estado.ESPERA, Evento.WAKEWORD):
                 print("[ConversationManager] Evento: Wakeword detectada, mudando de estado...")
-                self.estado = Estado.PERGUNTA
+                self.estado = Estado.OUVINDO
+                self.audio.stt.gravar_async()
+                return
 
-                print("[ConversationManager] Estado mudado. Entrando no loop de VAD...")
-
-                while True:
-                    self.audio.stt.gravar(RECORDINGS / "request.wav")
-
-                    
-
-            case Evento.FALA_USUARIO_ARQUIVADA:
-                texto = self.audio.stt.transcrever(RECORDINGS / "request.wav")
+            case (Estado.OUVINDO, Evento.FALA_USUARIO_ARQUIVADA):
+                texto = self.audio.stt.transcrever_async()
                 if not texto.strip():
                     self.estado = Estado.ESPERA
                     return
-                    
+                
                 print(f"[ConversationManager] Pergunta: {texto}")
+                self.estado = Estado.PROCESSANDO_RESPOSTA
+                ia.processar_async(texto)
+                    
+
+                
                 resposta = processar(texto)
                 if resposta:
                     falar(resposta)
                     print(f"[ConversationManager] Resposta: {resposta}")
                     # só volta pra wakeword se não terminou com pergunta
                     if not resposta.strip().endswith("?"):
-                        break
+                        self.estado = Estado.ESPERA
 
             case _:
-                print("[ConversationManager] Evento desconhecido")
+                print(f"[ConversationManager] Estado: {self.estado}, Evento ignorado: {evento}")
 
 
     def executar(self):

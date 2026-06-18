@@ -41,7 +41,6 @@ class Microfone:
             target=self._loop,
             daemon=True
         )
-
         self.thread.start()
 
         

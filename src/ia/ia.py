@@ -10,7 +10,7 @@ from .prompts import Prompts
 load_dotenv()
 
 class Ia:
-    def __init__(self, fila, situacao, dispositivos):
+    def __init__(self, fila_eventos, situacao, dispositivos):
         self.groq_key = os.getenv("GROQ_API_KEY")
         self.groq_model = os.getenv("GROQ_AI_MODEL")
         self.client = Groq(api_key=self.groq_key)
@@ -19,7 +19,7 @@ class Ia:
         self.dispositivos = dispositivos
         
         self.toolRegistry = ToolRegistry(self.dispositivos)
-        self.prompts = Prompts(fila, self.situacao)
+        self.prompts = Prompts(fila_eventos, self.situacao)
 
         self.messages = [
             {
@@ -28,7 +28,7 @@ class Ia:
             }
         ]
 
-        self.fila = fila
+        self.fila_eventos = fila_eventos
 
     def adicionar_mensagem(self, role, content):
         self.messages.append({
@@ -43,7 +43,7 @@ class Ia:
                 + self.messages[-10:]
             )
 
-    def processar(self, texto):
+    def _processar(self, texto):
         self.messages[0]["content"] = self.prompts.gerar_system_prompt()
         
         self._limitar_memoria()
@@ -60,7 +60,7 @@ class Ia:
                     tool_choice="auto"
                 )
                 tentativas = 0
-                self.fila.put(Event.IA_RESPONDEU)
+                self.fila_eventos.put(Event.RESPOSTA_GERADA)
             except Exception as e:
                 print(f"Erro: {e}")
                 tentativas += 1
@@ -85,7 +85,7 @@ class Ia:
                     if tc.function.name in available_functions:
                         args = json.loads(tc.function.arguments)
 
-                        print("TOOL CALL:")
+                        print("[IA] TOOL CALL:")
                         print(tc.id)
                         print(tc.function.name)
                         print(tc.function.arguments)
@@ -100,3 +100,9 @@ class Ia:
                         })
             else:
                 return content  # retorna o texto final pra SARA falar
+
+    def processar_async(self):
+        self.thread_processar = threading.Thread(
+            target=_processar,
+            daemon=True
+        )

@@ -4,8 +4,10 @@ import numpy as np
 import pyaudio
 import soundfile as sf
 import webrtcvad
+import threading
 
 from config.paths import SOUNDS
+from config.paths import RECORDINGS
 
 from faster_whisper import WhisperModel
 
@@ -14,7 +16,7 @@ from eventos import Evento
 
 class STT:
 
-    def __init__(self, fila, audio_bus):
+    def __init__(self, fila, audio_bus, request_path=(RECORDINGS / "request.wav")):
         self.fs = 16000
         self.modelo = WhisperModel(
             "small",
@@ -25,8 +27,10 @@ class STT:
         self.audio = pyaudio.PyAudio()
         self.fila_eventos = fila
         self.fila_audio = audio_bus.subscribe()
+        self.REQUEST_PATH = request_path
 
-    def gravar(self, arquivo):
+    def _gravar(self):
+        path = self.REQUEST_PATH
         frames = []
 
         silencio = 0
@@ -82,12 +86,20 @@ class STT:
 
         recording = recording.astype(np.float32) / 32768.0
 
-        sf.write(arquivo, recording, self.fs)
+        sf.write(path, recording, self.fs)
 
         self.fila_eventos.put(Evento.FALA_USUARIO_ARQUIVADA)
-        return arquivo
+        return path
 
-    def transcrever(self, audio):
+    def gravar_async(self):
+        self.thread_gravar = threading.Thread(
+            target=self._gravar,
+            daemon=True
+        )
+        self.thread_gravar.start()
+
+    def _transcrever(self):
+        audio = self.REQUEST_PATH
 
         segments, info = self.modelo.transcribe(
             audio,
@@ -97,3 +109,10 @@ class STT:
 
         self.fila_eventos.put(Evento.FALA_USUARIO_TRANSCRITA)
         return " ".join(segment.text for segment in segments)
+
+    def transcrever_async(self):
+        self.thread_transcrever = threading.Thread(
+            target=self._transcrever,
+            daemon=True
+        )
+        self.thread_transcrever.start()
