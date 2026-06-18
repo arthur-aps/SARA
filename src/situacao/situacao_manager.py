@@ -1,10 +1,12 @@
 from datetime import datetime
+from eventos import Evento
 
 
 class SituacaoManager:
 
     def __init__(self, fila, situacao):
         self.fila = fila
+        self.situacao = situacao
 
     def atualizar_periodo(self):
         hora = datetime.now().hour
@@ -21,4 +23,4 @@ class SituacaoManager:
             periodo = "madrugada"
 
         self.situacao.logica["ambiente"]["periodo"] = periodo
-        self.fila.put(Event.PERIODO_ATUALIZADO)
+        #self.fila.put(Evento.PERIODO_ATUALIZADO)

@@ -26,7 +26,7 @@ class Automacoes:
         self.verificar_periodo()
 
 
-    def verificar_presenca():
+    def verificar_presenca(self):
         agora = time.time()
 
         if self.situacao.fisica["presenca"]:
@@ -51,14 +51,14 @@ class Automacoes:
                 if agora - self.situacao.logica["automacao"]["ultima_saudacao"] > 600: # 10 min desde a última saudação
                     
                     threading.Thread(
-                        target=audio.falar,
+                        target=self.audio.tts.falar,
                         args=("Bem vindo de volta, Arthur.",),
                         daemon=True
                     ).start()
                     self.situacao.logica["automacao"]["ultima_saudacao"] = agora
 
 
-    def verificar_ausencia():
+    def verificar_ausencia(self):
         tempo_ausente = time.time() - self.situacao.logica["usuario"]["ultima_presenca"]
         self.situacao.logica["usuario"]["tempo_sem_presenca"] = tempo_ausente
 
@@ -76,7 +76,7 @@ class Automacoes:
             self.situacao.logica["automacao"]["modo_sono_automatico"] = True
 
 
-    def verificar_periodo():
+    def verificar_periodo(self):
         ambiente = self.situacao.logica["ambiente"]
 
         if ambiente["modo"] != "circadiano":

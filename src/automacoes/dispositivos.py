@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+import time
 
 from eventos import Evento
 
@@ -17,29 +18,29 @@ class Dispositivos:
         self.situacao = situacao
 
     def ligar_luz(self):
-        response = requests.get(f'http://{ESPip}/ligar_luz', timeout=3)
+        response = requests.get(f'http://{self.ESPip}/ligar_luz', timeout=3)
         if response.status_code == 200:
             self.situacao.fisica["luz"] = "ligada"
-            self.fila.put(Evento.LUZ_LIGADA)
+            #self.fila.put(Evento.LUZ_LIGADA)
             return response.text
         else:
             return "Falha ao ligar a luz"
 
     def desligar_luz(self):
-        response = requests.get(f'http://{ESPip}/desligar_luz', timeout=3)
+        response = requests.get(f'http://{self.ESPip}/desligar_luz', timeout=3)
         if response.status_code == 200:
             self.situacao.fisica["luz"] = "desligada"
-            self.fila.put(Evento.LUZ_DESLIGADA)
+            #self.fila.put(Evento.LUZ_DESLIGADA)
             return response.text
         else:
             return "Falha ao desligar a luz"
 
     def status(self):
-        response = requests.get(f'http://{ESPip}/status', timeout=3)
+        response = requests.get(f'http://{self.ESPip}/status', timeout=3)
         if response.status_code == 200:
             self.situacao.fisica.update(response.json())
             self.situacao.meta["ultima_sincronizacao"] = time.time()
-            self.fila.put(Evento.STATUS_QUARTO_CHAMADO)
+            #self.fila.put(Evento.STATUS_QUARTO_CHAMADO)
             return response.json()
         else:
             return "Falha ao obter status"
@@ -49,10 +50,10 @@ class Dispositivos:
             "fisica": self.situacao.fisica,
             "logica": self.situacao.logica
         }
-        self.fila.put(Evento.OBTER_self.situacao_CHAMADO)
+        #self.fila.put(Evento.OBTER_SITUACAO_CHAMADO)
 
     def definir_cor(self, red, green, blue):
-        response = requests.get(f'http://{ESPip}/cor?r={red}&g={green}&b={blue}', timeout=3)
+        response = requests.get(f'http://{self.ESPip}/cor?r={red}&g={green}&b={blue}', timeout=3)
 
         if response.status_code == 200:
             self.situacao.fisica["corLEDs"] = {
@@ -61,10 +62,10 @@ class Dispositivos:
                 "blue": blue
             }
 
-            self.fila.put(Evento.COR_LEDS_ALTERADA)
+            #self.fila.put(Evento.COR_LEDS_ALTERADA)
 
             self.situacao.logica["ambiente"]["modo"] = "personalizado"
-            self.fila.put(Evento.MODO_PERSONALIZADO)
+            #self.fila.put(Evento.MODO_PERSONALIZADO)
 
             return response.text
         else:
@@ -115,7 +116,7 @@ class Dispositivos:
 
         self.situacao.logica["ambiente"]["modo"] = "circadiano"
         self.situacao.logica["ambiente"]["ultima_acao"] = "modo circadiano"
-        self.fila.put(Evento.MODO_CIRCADIANO)
+        #self.fila.put(Evento.MODO_CIRCADIANO)
 
         return "Modo circadiano ativado."
 
@@ -126,7 +127,7 @@ class Dispositivos:
             (255,80,20), # quente, cinemático... uau
             False
         )
-        self.fila.put(Evento.MODO_CINEMA)
+        #self.fila.put(Evento.MODO_CINEMA)
 
     def modo_gaming(self):
         self._ativar_modo(
@@ -134,7 +135,7 @@ class Dispositivos:
             (255,0,0), # vermelho
             False
         )
-        self.fila.put(Evento.MODO_GAMING)
+        #self.fila.put(Evento.MODO_GAMING)
 
     def modo_leitura(self):
         self._ativar_modo(
@@ -142,7 +143,7 @@ class Dispositivos:
             (255,200,200), # branco quente
             False
         )
-        self.fila.put(Evento.MODO_LEITURA)
+        #self.fila.put(Evento.MODO_LEITURA)
 
     def modo_sono(self):
         self._ativar_modo(
@@ -150,7 +151,7 @@ class Dispositivos:
             (0,0,0), # tudo desligado
             False
         )
-        self.fila.put(Evento.MODO_SONO)
+        #self.fila.put(Evento.MODO_SONO)
 
     def modo_trabalho(self):
         self._ativar_modo(
@@ -158,7 +159,7 @@ class Dispositivos:
             (255,255,255), # tudo ligado
             True
         )
-        self.fila.put(Evento.MODO_TRABALHO)
+        #self.fila.put(Evento.MODO_TRABALHO)
 
     def modo_relaxar(self):
         self._ativar_modo(
@@ -166,4 +167,4 @@ class Dispositivos:
             (255,120,40), # quente, relaxante
             False
         )
-        self.fila.put(Evento.MODO_RELAXAR)
+        #self.fila.put(Evento.MODO_RELAXAR)

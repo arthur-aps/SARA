@@ -30,14 +30,15 @@ class ConversationManager:
                         if not resposta.strip().endswith("?"):
                             break
 
-            case Evento.FALA_USUARIO_TRANSCRITA:
-                pass
+            case Evento.MIC_GRAVACAO_INICIADA:
+                print("Gravação iniciada")
 
             case _:
                 print("Evento desconhecido")
 
 
     def executar(self):
+        self.audio.microfone.ler(self.audio.microfone.chunk_wakeword)
         self.audio.wakeword.aguardar()
 
         while True:
