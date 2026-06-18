@@ -12,5 +12,5 @@ class AudioManager:
         self.fila = fila
         self.microfone = Microfone(self.fila, self.audio_bus)
         self.wakeword = WakeWord(self.fila, self.audio_bus)
-        self.stt = STT(self.fila, self.microfone)
+        self.stt = STT(self.fila, self.audio_bus)
         self.tts = TTS(self.fila)

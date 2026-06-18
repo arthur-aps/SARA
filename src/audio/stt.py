@@ -14,7 +14,7 @@ from eventos import Evento
 
 class STT:
 
-    def __init__(self, fila, mic):
+    def __init__(self, fila, audio_bus):
         self.fs = 16000
         self.modelo = WhisperModel(
             "small",
@@ -23,10 +23,14 @@ class STT:
         )
         self.vad = webrtcvad.Vad(2)
         self.audio = pyaudio.PyAudio()
-        self.fila = fila
-        self.mic = mic
+        self.fila_eventos = fila
+        self.fila_audio = audio_bus.subscribe()
 
     def gravar(self, arquivo):
+        frames = []
+
+        silencio = 0
+        falando = False
 
         subprocess.run([
             "ffplay",
@@ -37,17 +41,12 @@ class STT:
             str(SOUNDS / "start-stream.mp3")
         ])
 
-        print("gravando...")
-        self.fila.put(Evento.FALA_USUARIO_INICIADA)
-
-        frames = []
-
-        silencio = 0
-        falando = False
+        print("[STT] Gravando...")
+        self.fila_eventos.put(Evento.FALA_USUARIO_INICIADA)
 
         while True:
 
-            chunk = self.mic.ler(self.mic.chunk_vad)
+            chunk = self.fila_audio.get()
 
             is_speech = self.vad.is_speech(chunk, self.fs)
 
@@ -61,7 +60,7 @@ class STT:
                 silencio += 1
                 frames.append(chunk)
 
-                if silencio > 50:
+                if silencio > 150:
                     break
 
         subprocess.run([
@@ -73,8 +72,8 @@ class STT:
             str(SOUNDS / "end-stream.mp3")
         ])
 
-        print("fim da gravação.")
-        self.fila.put(Evento.FALA_USUARIO_FINALIZADA)
+        print("[STT] Fim da gravação.")
+        self.fila_eventos.put(Evento.FALA_USUARIO_FINALIZADA)
 
         recording = np.frombuffer(
             b"".join(frames),
@@ -85,7 +84,7 @@ class STT:
 
         sf.write(arquivo, recording, self.fs)
 
-        self.fila.put(Evento.FALA_USUARIO_ARQUIVADA)
+        self.fila_eventos.put(Evento.FALA_USUARIO_ARQUIVADA)
         return arquivo
 
     def transcrever(self, audio):
@@ -96,5 +95,5 @@ class STT:
             vad_filter=True
         )
 
-        self.fila.put(Evento.FALA_USUARIO_TRANSCRITA)
+        self.fila_eventos.put(Evento.FALA_USUARIO_TRANSCRITA)
         return " ".join(segment.text for segment in segments)

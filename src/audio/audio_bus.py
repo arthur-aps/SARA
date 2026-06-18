@@ -12,9 +12,11 @@ class AudioBus:
 
         self.listeners.append(fila)
 
+        print("[AudioBus] Subscribe no bus realizado com sucesso.")
+
         return fila
 
     def publish(self, chunk):
-
+        
         for fila in self.listeners:
             fila.put(chunk)

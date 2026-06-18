@@ -9,8 +9,7 @@ class Microfone:
     def __init__(self, fila_eventos, audio_bus, fs=16000):
         self.fs = fs
 
-        self.chunk_vad = 320
-        self.chunk_wakeword = 1280
+        self.CHUNK_SIZE = 320
         
         self.audio = pyaudio.PyAudio()
 
@@ -19,30 +18,27 @@ class Microfone:
             channels=1,
             rate=fs,
             input=True,
-            frames_per_buffer=1280
+            frames_per_buffer=320
         )
 
         self.fila_eventos = fila_eventos
 
         self.audio_bus = audio_bus
 
-    def _loop(self, frames_per_buffer):
+    def _loop(self):
+        print("[Microfone] Colocando evento de gravação na fila de eventos...")
+
         self.fila_eventos.put(Evento.MIC_GRAVACAO_INICIADA)
 
         while True:
-            chunk = self.stream.read(
-                frames_per_buffer,
-                exception_on_overflow=False
-            )
-
+            chunk = self.stream.read(self.CHUNK_SIZE)
             self.audio_bus.publish(chunk)
 
 
-    def ler(self, frames_per_buffer):
+    def iniciar(self):
 
         self.thread = threading.Thread(
             target=self._loop,
-            args=(frames_per_buffer,),
             daemon=True
         )
 
@@ -51,6 +47,7 @@ class Microfone:
         
 
     def fechar(self):
+        print("[Microfone] Fechando stream...")
         self.stream.stop_stream()
         self.stream.close()
         self.audio.terminate()
