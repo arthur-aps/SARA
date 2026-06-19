@@ -165,7 +165,7 @@ MOSFETs
 - [x] Síntese de voz
 - [x] Controle de fita LED RGB
 - [ ] Controle do ar condicionado (IR)
-- [ ] Modos de iluminação dos LEDs (cinema, gaming, leitura)
+- [x] Modos de iluminação dos LEDs (cinema, gaming, leitura)
 - [ ] Sincronização de LEDs com voz da SARA
 - [ ] PCB customizada
 - [ ] Case 3D impresso
