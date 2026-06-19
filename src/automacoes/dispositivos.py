@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 import time
 
-from eventos import Evento
+#from eventos import Evento
 
 
 load_dotenv()

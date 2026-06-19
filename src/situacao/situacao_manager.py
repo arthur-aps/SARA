@@ -1,5 +1,5 @@
 from datetime import datetime
-from eventos import Evento
+from eventos import PeriodoAtualizado
 
 
 class SituacaoManager:
@@ -23,4 +23,4 @@ class SituacaoManager:
             periodo = "madrugada"
 
         self.situacao.logica["ambiente"]["periodo"] = periodo
-        #self.fila.put(Evento.PERIODO_ATUALIZADO)
+        #self.fila.put(PeriodoAtualizado(periodo))

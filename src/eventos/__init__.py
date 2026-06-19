@@ -1,2 +1,2 @@
-from .eventos import Evento
+from .eventos import *
 from .estado import Estado

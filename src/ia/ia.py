@@ -2,9 +2,12 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 import json
+import threading
 
 from .tool_registry import ToolRegistry
 from .prompts import Prompts
+
+from eventos import IaRespondeu
 
 
 load_dotenv()
@@ -18,7 +21,7 @@ class Ia:
         self.situacao = situacao
         self.dispositivos = dispositivos
         
-        self.toolRegistry = ToolRegistry(self.dispositivos)
+        self.tool_registry = ToolRegistry(self.dispositivos)
         self.prompts = Prompts(fila_eventos, self.situacao)
 
         self.messages = [
@@ -49,6 +52,9 @@ class Ia:
         self._limitar_memoria()
 
         self.adicionar_mensagem('user', texto)
+
+        tools = self.tool_registry.TOOLS
+        available_functions = self.tool_registry.AVAILABLE_FUNCTIONS
         
         tentativas = 0
         while True:
@@ -60,9 +66,9 @@ class Ia:
                     tool_choice="auto"
                 )
                 tentativas = 0
-                self.fila_eventos.put(Event.RESPOSTA_GERADA)
+
             except Exception as e:
-                print(f"Erro: {e}")
+                print(f"[IA] Erro: {e}")
                 tentativas += 1
                 if tentativas >= 3:
                     return "Desculpe, tive um problema. Pode repetir?"
@@ -99,10 +105,15 @@ class Ia:
                             'content': str(result)
                         })
             else:
-                return content  # retorna o texto final pra SARA falar
+                self.fila_eventos.put(
+                    IaRespondeu(content)
+                )
+                return
 
-    def processar_async(self):
+    def processar_async(self, texto):
         self.thread_processar = threading.Thread(
-            target=_processar,
+            target=self._processar,
+            args=(texto,),
             daemon=True
         )
+        self.thread_processar.start()

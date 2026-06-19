@@ -1,7 +1,7 @@
 import pyaudio
 import threading
 
-from eventos import Evento
+from eventos import MicGravacaoIniciada
 
 
 class Microfone:
@@ -26,9 +26,9 @@ class Microfone:
         self.audio_bus = audio_bus
 
     def _loop(self):
-        print("[Microfone] Colocando evento de gravação na fila de eventos...")
+        print("[Microfone] Iniciando gravação...")
 
-        self.fila_eventos.put(Evento.MIC_GRAVACAO_INICIADA)
+        self.fila_eventos.put(MicGravacaoIniciada())
 
         while True:
             chunk = self.stream.read(self.CHUNK_SIZE)

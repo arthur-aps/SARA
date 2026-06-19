@@ -11,7 +11,12 @@ from config.paths import RECORDINGS
 
 from faster_whisper import WhisperModel
 
-from eventos import Evento
+from eventos import (
+    FalaUsuarioIniciada,
+    FalaUsuarioFinalizada,
+    FalaUsuarioArquivada,
+    FalaUsuarioTranscrita
+)
 
 
 class STT:
@@ -26,7 +31,7 @@ class STT:
         self.vad = webrtcvad.Vad(2)
         self.audio = pyaudio.PyAudio()
         self.fila_eventos = fila
-        self.fila_audio = audio_bus.subscribe()
+        self.audio_bus = audio_bus
         self.REQUEST_PATH = request_path
 
     def _gravar(self):
@@ -36,67 +41,75 @@ class STT:
         silencio = 0
         falando = False
 
-        subprocess.run([
-            "ffplay",
-            "-nodisp",
-            "-autoexit",
-            "-loglevel",
-            "quiet",
-            str(SOUNDS / "start-stream.mp3")
-        ])
+        fila_audio = self.audio_bus.subscribe()
 
-        print("[STT] Gravando...")
-        self.fila_eventos.put(Evento.FALA_USUARIO_INICIADA)
+        try:
+            subprocess.run([
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel",
+                "quiet",
+                str(SOUNDS / "start-stream.mp3")
+            ])
 
-        while True:
+            self.audio_bus.flush(fila_audio)
 
-            chunk = self.fila_audio.get()
+            print("[STT] Gravando...")
 
-            is_speech = self.vad.is_speech(chunk, self.fs)
+            self.fila_eventos.put(FalaUsuarioIniciada())
 
-            if is_speech:
-                falando = True
-                silencio = 0
-                frames.append(chunk)
+            while True:
 
-            elif falando:
+                chunk = fila_audio.get()
 
-                silencio += 1
-                frames.append(chunk)
+                is_speech = self.vad.is_speech(chunk, self.fs)
 
-                if silencio > 150:
-                    break
+                if is_speech:
+                    falando = True
+                    silencio = 0
+                    frames.append(chunk)
 
-        subprocess.run([
-            "ffplay",
-            "-nodisp",
-            "-autoexit",
-            "-loglevel",
-            "quiet",
-            str(SOUNDS / "end-stream.mp3")
-        ])
+                elif falando:
 
-        print("[STT] Fim da gravação.")
-        self.fila_eventos.put(Evento.FALA_USUARIO_FINALIZADA)
+                    silencio += 1
+                    frames.append(chunk)
 
-        recording = np.frombuffer(
-            b"".join(frames),
-            dtype=np.int16
-        )
+                    if silencio > 80:
+                        break
 
-        recording = recording.astype(np.float32) / 32768.0
+            subprocess.run([
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel",
+                "quiet",
+                str(SOUNDS / "end-stream.mp3")
+            ])
 
-        sf.write(path, recording, self.fs)
+            print("[STT] Fim da gravação.")
+            self.fila_eventos.put(FalaUsuarioFinalizada(path))
 
-        self.fila_eventos.put(Evento.FALA_USUARIO_ARQUIVADA)
-        return path
+            recording = np.frombuffer(
+                b"".join(frames),
+                dtype=np.int16
+            )
+
+            recording = recording.astype(np.float32) / 32768.0
+
+            sf.write(path, recording, self.fs)
+            self.fila_eventos.put(FalaUsuarioArquivada(path))
+
+        finally:
+            self.audio_bus.unsubscribe(fila_audio)
+
 
     def gravar_async(self):
         self.thread_gravar = threading.Thread(
             target=self._gravar,
             daemon=True
-        )
-        self.thread_gravar.start()
+        ).start()
+
 
     def _transcrever(self):
         audio = self.REQUEST_PATH
@@ -107,8 +120,9 @@ class STT:
             vad_filter=True
         )
 
-        self.fila_eventos.put(Evento.FALA_USUARIO_TRANSCRITA)
-        return " ".join(segment.text for segment in segments)
+        texto = " ".join(segment.text for segment in segments)
+
+        self.fila_eventos.put(FalaUsuarioTranscrita(texto))
 
     def transcrever_async(self):
         self.thread_transcrever = threading.Thread(

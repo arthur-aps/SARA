@@ -11,42 +11,55 @@ class MicGravacaoEncerrada:
     pass
 
 
+
 @dataclass
 class Wakeword:
     pass
 
+
+
+@dataclass
+class FalaUsuarioIniciada:
+    pass
+
+@dataclass
+class FalaUsuarioFinalizada:
+    caminho: Path
 
 @dataclass
 class FalaUsuarioArquivada:
     caminho: Path
 
 @dataclass
-class TextoTranscrito:
-    caminho: Path
+class FalaUsuarioTranscrita:
+    transcricao: str
+
+
 
 @dataclass
 class IaRespondeu:
     resposta: str
 
+
+
 @dataclass
-class TTSTerminado:
+class TTSArquivando:
     pass
 
-class Evento(Enum):
+@dataclass
+class TTSArquivado:
+    pass
 
-    MIC_GRAVACAO_INICIADA = auto()
-    MIC_GRAVACAO_ENCERRADA = auto()
+@dataclass
+class TTSRodando:
+    pass
 
-    WAKEWORD = auto()
+@dataclass
+class TTSRodado:
+    pass
 
-    FALA_USUARIO_INICIADA = auto()
-    FALA_USUARIO_FINALIZADA = auto()
-    FALA_USUARIO_ARQUIVADA = auto()
-    FALA_USUARIO_TRANSCRITA = auto()
 
-    IA_RESPONDEU = auto()
 
-    TTS_ARQUIVANDO = auto()
-    TTS_ARQUIVADO = auto()
-    TTS_RODANDO = auto()
-    TTS_RODADO = auto()
+@dataclass
+class PeriodoAtualizado:
+    periodo: str

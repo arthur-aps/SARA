@@ -1,6 +1,22 @@
 import time
 
-from eventos import Evento, Estado
+from eventos import (
+    MicGravacaoIniciada,
+    MicGravacaoEncerrada,
+    Wakeword,
+    FalaUsuarioIniciada,
+    FalaUsuarioFinalizada,
+    FalaUsuarioArquivada,
+    FalaUsuarioTranscrita,
+    IaRespondeu,
+    TTSArquivando,
+    TTSArquivado,
+    TTSRodando,
+    TTSRodado,
+    PeriodoAtualizado
+)
+
+from eventos import Estado
 
 
 class ConversationManager:
@@ -13,38 +29,62 @@ class ConversationManager:
 
         self.estado = Estado.ESPERA
 
+
     def processar(self, evento):
         match (self.estado, evento):
 
-            case (Estado.ESPERA, Evento.MIC_GRAVACAO_INICIADA):
-                print("[ConversationManager] Gravação iniciada")
+            case (Estado.ESPERA, MicGravacaoIniciada()):
+                print("[ConversationManager] Microfone iniciado")
                 return
 
-            case (Estado.ESPERA, Evento.WAKEWORD):
+
+            case (Estado.ESPERA, Wakeword()):
                 print("[ConversationManager] Evento: Wakeword detectada, mudando de estado...")
                 self.estado = Estado.OUVINDO
                 self.audio.stt.gravar_async()
                 return
 
-            case (Estado.OUVINDO, Evento.FALA_USUARIO_ARQUIVADA):
-                texto = self.audio.stt.transcrever_async()
+
+            case (Estado.OUVINDO, FalaUsuarioArquivada(path)):
+                self.estado = Estado.TRANSCREVENDO
+                self.audio.stt.transcrever_async()
+                return
+
+
+            case (Estado.TRANSCREVENDO, FalaUsuarioTranscrita(texto)):
                 if not texto.strip():
+                    print("[ConversationManager] Nenhuma fala detectada para transcrever.")
                     self.estado = Estado.ESPERA
+                    self.audio.wakeword.aguardar_async()
                     return
                 
                 print(f"[ConversationManager] Pergunta: {texto}")
                 self.estado = Estado.PROCESSANDO_RESPOSTA
-                ia.processar_async(texto)
-                    
+                self.ia.processar_async(texto)
+                return
 
-                
-                resposta = processar(texto)
+
+            case (Estado.PROCESSANDO_RESPOSTA, IaRespondeu(resposta)):
                 if resposta:
-                    falar(resposta)
                     print(f"[ConversationManager] Resposta: {resposta}")
-                    # só volta pra wakeword se não terminou com pergunta
-                    if not resposta.strip().endswith("?"):
-                        self.estado = Estado.ESPERA
+                    self.estado = Estado.IA_FALANDO
+                    self.audio.tts.falar_async(resposta)
+                    return
+
+                else:
+                    print("[ConversationManager] Resposta da IA não veio... estranho")
+                    return
+
+
+            case (Estado.IA_FALANDO, TTSRodado()):
+                self.estado = Estado.OUVINDO
+                self.audio.stt.gravar_async()
+                return
+
+
+            case (Estado.ESPERA, PeriodoAtualizado(periodo)):
+                pass
+
 
             case _:
                 print(f"[ConversationManager] Estado: {self.estado}, Evento ignorado: {evento}")
@@ -53,10 +93,11 @@ class ConversationManager:
     def executar(self):
         print("[ConversationManager] Ligando o microfone...")
         self.audio.microfone.iniciar()
-        print("[ConversationManager] Microfone ligado! Ativando espera de wakeword...")
-        self.audio.wakeword.aguardar()
-        print("[ConversationManager] Wakeword detectada, indo rodar o loop de eventos...")
 
+        print("[ConversationManager] Ativando espera de wakeword...")
+        self.audio.wakeword.aguardar_async()
+
+        # escuta eventos
         while True:
 
             evento = self.fila_eventos.get()
