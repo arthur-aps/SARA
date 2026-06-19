@@ -35,8 +35,8 @@ Tudo isso em alguns segundos.
 - Módulo relé 1 canal
 - Sensor DHT22 (temperatura e umidade)
 - Sensor PIR HC-SR501 (presença)
+- Fita LED RGB 5050 12V + MOSFETs
 - Receptor IR TSOP1838 (em breve — controle do AC)
-- Fita LED RGB 5050 12V + MOSFETs (em breve)
 
 **Software — ESP32**
 - Framework Arduino (PlatformIO)
@@ -128,9 +128,9 @@ MOSFETs
 > -> liga a luz e te responde
 
 > *"SARA, como está o quarto?"*
-> -> consulta temperatura, umidade e estado da luz -> responde
+> -> consulta temperatura, umidade e estado das luzes -> responde
 
-> *"SARA, modo cinema"* (em breve)
+> *"SARA, modo cinema"*
 > -> ajusta as LEDs pra cor quente e baixo brilho
 
 ---
