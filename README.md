@@ -53,24 +53,6 @@ Tudo isso em alguns segundos.
 
 ---
 
-## Estrutura do projeto
-
-```
-SARA/
-├── SARA.py                     # ponto de entrada, loop principal
-├── audio.py                    # gravação, transcrição, TTS
-├── wakeword.py                 # detecção de palavra de ativação
-├── dispositivos.py             # funções que controlam o ESP32
-├── ia.py                       # cliente Groq, tools, messages
-├── models/                     # modelos de wakeword (.onnx)
-├── .env.example                # variáveis de ambiente necessárias
-└── sara-esp-server/            # firmware do ESP32 (PlatformIO), controle dos dispositivos
-    └── src/
-        └── secrets.h.example   # variáveis pro ESP32 conectar com seu roteador
-```
-
----
-
 ## Como rodar
 
 ### Pré-requisitos
@@ -111,7 +93,7 @@ cp secrets.h.example secrets.h
 no diretório do projeto:
 
 ```bash
-python SARA.py
+python src/main.py
 ```
 
 ---
