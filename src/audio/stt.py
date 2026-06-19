@@ -1,7 +1,6 @@
 import subprocess
 
 import numpy as np
-import pyaudio
 import soundfile as sf
 import webrtcvad
 import threading
@@ -28,18 +27,13 @@ class STT:
             device="cpu",
             compute_type="int8"
         )
-        self.vad = webrtcvad.Vad(2)
-        self.audio = pyaudio.PyAudio()
+        self.vad = webrtcvad.Vad(3)
         self.fila_eventos = fila
         self.audio_bus = audio_bus
         self.REQUEST_PATH = request_path
 
     def _gravar(self):
         path = self.REQUEST_PATH
-        frames = []
-
-        silencio = 0
-        falando = False
 
         fila_audio = self.audio_bus.subscribe()
 
@@ -59,24 +53,60 @@ class STT:
 
             self.fila_eventos.put(FalaUsuarioIniciada())
 
+            frames = []
+
+            FRAME_MS = 20
+
+            MAX_INITIAL_SILENCE_MS = 1000
+            MAX_END_SILENCE_MS = 2000
+            MIN_SPEECH_MS = 100
+
+            MAX_INITIAL_SILENCE = MAX_INITIAL_SILENCE_MS // FRAME_MS
+            MAX_END_SILENCE = MAX_END_SILENCE_MS // FRAME_MS
+            MIN_SPEECH_FRAMES = MIN_SPEECH_MS // FRAME_MS
+
+            initial_silence_frames = 0
+            silence_frames = 0
+            speech_frames = 0
+            fala_iniciada = False
+
             while True:
 
                 chunk = fila_audio.get()
 
-                is_speech = self.vad.is_speech(chunk, self.fs)
+                audio = np.frombuffer(chunk, dtype=np.int16)
+
+                rms = np.sqrt(np.mean(audio.astype(np.float32) ** 2))
+
+                is_speech = (
+                    rms > 650
+                    and self.vad.is_speech(chunk, self.fs)
+                )
 
                 if is_speech:
-                    falando = True
-                    silencio = 0
+                    speech_frames += 1
+                    silence_frames = 0
                     frames.append(chunk)
 
-                elif falando:
+                    if speech_frames >= MIN_SPEECH_FRAMES:
+                        fala_iniciada = True
 
-                    silencio += 1
-                    frames.append(chunk)
+                else:
+                    if fala_iniciada:
+                        silence_frames += 1
 
-                    if silencio > 80:
-                        break
+                        if silence_frames > MAX_END_SILENCE:
+                            break
+
+                    else:
+                        if speech_frames > 0:
+                            frames.clear()
+
+                        speech_frames = 0
+                        initial_silence_frames += 1
+
+                        if initial_silence_frames > MAX_INITIAL_SILENCE:
+                            break
 
             subprocess.run([
                 "ffplay",
