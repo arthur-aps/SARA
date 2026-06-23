@@ -3,7 +3,7 @@ openwakeword
 groq
 ollama
 edge-tts
-PyAudio
+sounddevice
 soundfile
 python-dotenv
 webrtcvad

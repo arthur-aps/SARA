@@ -1,53 +1,41 @@
-import pyaudio
-import threading
+import sounddevice as sd
 
-from eventos import MicGravacaoIniciada
+from eventos import (
+   MicGravacaoIniciada,
+   MicGravacaoEncerrada
+)
 
 
 class Microfone:
 
     def __init__(self, fila_eventos, audio_bus, fs=16000):
-        self.fs = fs
-
-        self.CHUNK_SIZE = 320
-        
-        self.audio = pyaudio.PyAudio()
-
-        self.stream = self.audio.open(
-            format=pyaudio.paInt16,
-            channels=1,
-            rate=fs,
-            input=True,
-            frames_per_buffer=320
-        )
-
         self.fila_eventos = fila_eventos
-
         self.audio_bus = audio_bus
 
-    def _loop(self):
-        print("[Microfone] Iniciando gravação...")
+        self.stream = sd.InputStream(
+            samplerate=fs,
+            channels=1,
+            dtype="int16",
+            blocksize=320,
+            callback=self._callback
+        )
 
-        self.fila_eventos.put(MicGravacaoIniciada())
 
-        while True:
-            chunk = self.stream.read(self.CHUNK_SIZE)
-            self.audio_bus.publish(chunk)
+    def _callback(self, indata, frames, time, status):
+        if status:
+            print(f"[Microfone] {status}")
+
+        self.audio_bus.publish(indata.tobytes())
 
 
     def iniciar(self):
-
-        self.thread = threading.Thread(
-            target=self._loop,
-            daemon=True
-        )
-        self.thread.start()
-
+        print("[Microfone] Iniciando gravação...")
+        self.stream.start()
+        self.fila_eventos.put(MicGravacaoIniciada())
         
 
     def fechar(self):
         print("[Microfone] Fechando stream...")
-        self.stream.stop_stream()
+        self.stream.stop()
         self.stream.close()
-        self.audio.terminate()
-        self.fila_eventos.put(MicGravacaoEncerrada)
+        self.fila_eventos.put(MicGravacaoEncerrada())
