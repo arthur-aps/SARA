@@ -15,7 +15,7 @@ class SituacaoManager:
             periodo = "manha"
         elif 12 <= hora < 18:
             periodo = "tarde"
-        elif 18 <= hora < 20:
+        elif 17 <= hora < 20:
             periodo = "tarde_para_noite"
         elif 20 <= hora:
             periodo = "noite"
@@ -23,4 +23,3 @@ class SituacaoManager:
             periodo = "madrugada"
 
         self.situacao.logica["ambiente"]["periodo"] = periodo
-        #self.fila.put(PeriodoAtualizado(periodo))

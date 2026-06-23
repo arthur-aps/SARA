@@ -79,9 +79,6 @@ class Automacoes:
     def verificar_periodo(self):
         ambiente = self.situacao.logica["ambiente"]
 
-        if ambiente["modo"] != "circadiano":
-            return
-
         if ambiente["periodo"] == ambiente["periodo_anterior"]:
             return
 
@@ -90,7 +87,8 @@ class Automacoes:
             f"{ambiente['periodo_anterior']} -> {ambiente['periodo']}"
         )
 
-        self.dispositivos.modo_circadiano()
+        if ambiente["modo"] == "circadiano":
+            self.dispositivos.modo_circadiano()
 
         ambiente["periodo_anterior"] = ambiente["periodo"]
 
