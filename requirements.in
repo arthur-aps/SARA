@@ -1,0 +1,11 @@
+faster-whisper
+openwakeword
+groq
+ollama
+edge-tts
+PyAudio
+soundfile
+python-dotenv
+webrtcvad
+requests
+setuptools>=80,<81

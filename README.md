@@ -84,34 +84,22 @@ SARA/
 ```bash
 git clone https://github.com/arthur-aps/SARA
 cd SARA
-python -m venv venv # pode dar o nome que quiser pro venv
-source venv/bin/activate.fish  # ou activate para bash
-pip install -r requirements.txt
+./scripts/setup.sh
 ```
 
 ### Configuração
 
-Cria um `.env` baseado no `.env.example`:
+Edite os arquivos `.env` e `secrets.h`:
 
+```bash
+nano .env
+nano sara-esp-server/src/secrets.h
 ```
-cp .env.example .env
-# edite o .env com suas chaves
-```
-
-E em [sara-esp-server/src](sara-esp-server/src) cria um `secrets.h` baseado no `secrets.h.example`
-
-````
-cd sara-esp-server/src
-cp secrets.h.example secrets.h
-# edite com ssid e senha da sua rede
-````
 
 ### Rodar o programa
 
-no diretório do projeto:
-
 ```bash
-python SARA.py
+./scripts/run.sh
 ```
 
 ---
@@ -148,8 +136,8 @@ MOSFETs
 > *"SARA, como está o quarto?"*
 > -> consulta temperatura, umidade e estado da luz -> responde
 
-> *"SARA, modo cinema"* (em breve)
-> -> ajusta as LEDs pra cor quente e baixo brilho
+> *"SARA, modo cinema"*
+> -> ajusta as LEDs pra cor quente
 
 ---
 

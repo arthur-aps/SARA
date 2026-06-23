@@ -1,4 +1,5 @@
 import subprocess
+import os
 
 import numpy as np
 import soundfile as sf
@@ -21,11 +22,26 @@ from eventos import (
 class STT:
 
     def __init__(self, fila, audio_bus, request_path=(RECORDINGS / "request.wav")):
+        usar_gpu = os.getenv("SARA_USE_GPU", "0") == "1"
+
+        config = {
+            True: {
+                "model": "medium",
+                "device": "cuda",
+                "compute_type": "float16",
+            },
+            False: {
+                "model": "small",
+                "device": "cpu",
+                "compute_type": "int8",
+            },
+        }[usar_gpu]
+
         self.fs = 16000
         self.modelo = WhisperModel(
-            "small",
-            device="cpu",
-            compute_type="int8"
+            config["model"],
+            device=config["device"],
+            compute_type=config["compute_type"],
         )
         self.vad = webrtcvad.Vad(3)
         self.fila_eventos = fila
@@ -57,8 +73,8 @@ class STT:
 
             FRAME_MS = 20
 
-            MAX_INITIAL_SILENCE_MS = 1000
-            MAX_END_SILENCE_MS = 2000
+            MAX_INITIAL_SILENCE_MS = 300
+            MAX_END_SILENCE_MS = 700
             MIN_SPEECH_MS = 100
 
             MAX_INITIAL_SILENCE = MAX_INITIAL_SILENCE_MS // FRAME_MS
