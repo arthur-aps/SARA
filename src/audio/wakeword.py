@@ -8,6 +8,8 @@ from config.paths import WWMODELS
 
 from eventos import Wakeword
 
+from audio import AudioChunk
+
 
 class WakeWord:
 
@@ -28,7 +30,7 @@ class WakeWord:
         while True:
             
             buffer = b"".join(
-                self.fila_audio.get() for _ in range(4)
+                self.fila_audio.get().samples.tobytes() for _ in range(4)
             )
 
             audio = np.frombuffer(buffer, dtype=np.int16)

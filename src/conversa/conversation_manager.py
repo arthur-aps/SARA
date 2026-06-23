@@ -34,12 +34,10 @@ class ConversationManager:
         match (self.estado, evento):
 
             case (Estado.ESPERA, MicGravacaoIniciada()):
-                print("[ConversationManager] Microfone iniciado")
                 return
 
 
             case (Estado.ESPERA, Wakeword()):
-                print("[ConversationManager] Evento: Wakeword detectada, mudando de estado...")
                 self.estado = Estado.OUVINDO
                 self.audio.stt.gravar_async()
                 return

@@ -18,6 +18,8 @@ from eventos import (
     FalaUsuarioTranscrita
 )
 
+from audio import AudioChunk
+
 
 class STT:
 
@@ -90,19 +92,15 @@ class STT:
 
                 chunk = fila_audio.get()
 
-                audio = np.frombuffer(chunk, dtype=np.int16)
-
-                rms = np.sqrt(np.mean(audio.astype(np.float32) ** 2))
-
                 is_speech = (
-                    rms > 650
-                    and self.vad.is_speech(chunk, self.fs)
+                    chunk.rms > 650 and
+                    self.vad.is_speech(chunk.samples.tobytes(), self.fs)
                 )
 
                 if is_speech:
                     speech_frames += 1
                     silence_frames = 0
-                    frames.append(chunk)
+                    frames.append(chunk.samples.copy())
 
                     if speech_frames >= MIN_SPEECH_FRAMES:
                         fala_iniciada = True

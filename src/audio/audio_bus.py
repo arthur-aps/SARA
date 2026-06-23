@@ -7,7 +7,7 @@ class AudioBus:
         self.listeners = []
 
 
-    def subscribe(self):
+    def subscribe(self) -> Queue[AudioChunk]:
         fila = Queue()
 
         self.listeners.append(fila)
@@ -22,7 +22,7 @@ class AudioBus:
             self.listeners.remove(fila)
 
 
-    def publish(self, chunk):
+    def publish(self, chunk: AudioChunk):
         for fila in list(self.listeners):
             fila.put(chunk)
 

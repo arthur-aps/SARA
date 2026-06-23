@@ -1,9 +1,12 @@
 import sounddevice as sd
+import numpy as np
 
 from eventos import (
    MicGravacaoIniciada,
    MicGravacaoEncerrada
 )
+
+from audio import AudioChunk
 
 
 class Microfone:
@@ -25,7 +28,11 @@ class Microfone:
         if status:
             print(f"[Microfone] {status}")
 
-        self.audio_bus.publish(indata.tobytes())
+        audio = indata[:, 0].copy()
+
+        rms = np.sqrt(np.mean(audio.astype(np.float32) ** 2))
+
+        self.audio_bus.publish(AudioChunk(audio, rms))
 
 
     def iniciar(self):
