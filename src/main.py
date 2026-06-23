@@ -1,6 +1,3 @@
-import time
-import threading
-
 from audio import AudioManager
 from ia import Ia
 from situacao import Situacao, SituacaoManager, Serializer
@@ -46,11 +43,11 @@ def main():
         ia,
     )
 
-    print("[main] Iniciando automacoes...")
-    automacoes.iniciar()
-
     print("[main] Carregando estado do quarto anterior com serializer...")
     serializer.carregar()
+
+    print("[main] Iniciando automacoes...")
+    automacoes.iniciar()
 
     print("[main] Executando módulo orquestrador de conversação...")
     conversation.executar()

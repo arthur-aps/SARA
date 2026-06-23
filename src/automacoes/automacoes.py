@@ -1,7 +1,7 @@
 import time
 import threading
 
-from eventos import PeriodoMudou
+from eventos import FalaSistemaSolicitada
 
 
 class Automacoes:
@@ -14,7 +14,6 @@ class Automacoes:
 
 
     def tick(self):
-        self.situacao.logica["ambiente"]["periodo_anterior"] = self.situacao.logica["ambiente"]["periodo"]
         self.situacao_manager.atualizar_periodo()
 
         try:
@@ -51,12 +50,9 @@ class Automacoes:
                     )
                     self.dispositivos.modo_circadiano()
                 if agora - self.situacao.logica["automacao"]["ultima_saudacao"] > 600: # 10 min desde a última saudação
-                    
-                    threading.Thread(
-                        target=self.audio.tts.falar,
-                        args=("Bem vindo de volta, Arthur.",),
-                        daemon=True
-                    ).start()
+                    self.fila_eventos.put(
+                        FalaSistemaSolicitada("Bem vindo de volta, Arthur.")
+                    )
                     self.situacao.logica["automacao"]["ultima_saudacao"] = agora
 
 
@@ -71,7 +67,7 @@ class Automacoes:
         if (
             tempo_ausente > 900 and
             not self.situacao.logica["automacao"]["modo_sono_automatico"] and
-            not self.situacao.logica["modo"]["cinema"]
+            self.situacao.logica["ambiente"]["modo"] != "cinema"
         ): # 15 min de ausência entra no modo sono, exceto se estava no modo cinema
             print("[AUTOMAÇÃO] Sem presença há mais de 15 minutos, ativando modo sono...")
             self.dispositivos.modo_sono()
@@ -83,8 +79,6 @@ class Automacoes:
 
         if ambiente["periodo"] == ambiente["periodo_anterior"]:
             return
-
-        self.fila_eventos.put(PeriodoMudou(ambiente["periodo"]))
 
         print(
             f"[AUTOMAÇÃO] Mudança de período: "

@@ -128,6 +128,7 @@ class Dispositivos:
             False
         )
         #self.fila.put(Evento.MODO_CINEMA)
+        return "Modo cinema ativado."
 
     def modo_gaming(self):
         self._ativar_modo(
@@ -136,35 +137,40 @@ class Dispositivos:
             False
         )
         #self.fila.put(Evento.MODO_GAMING)
+        return "Modo gaming ativado."
 
     def modo_leitura(self):
         self._ativar_modo(
-            "gaming",
+            "leitura",
             (255,200,200), # branco quente
             False
         )
         #self.fila.put(Evento.MODO_LEITURA)
+        return "Modo leitura ativado."
 
     def modo_sono(self):
         self._ativar_modo(
-            "gaming",
+            "sono",
             (0,0,0), # tudo desligado
             False
         )
         #self.fila.put(Evento.MODO_SONO)
+        return "Modo sono ativado."
 
     def modo_trabalho(self):
         self._ativar_modo(
-            "gaming",
+            "trabalho",
             (255,255,255), # tudo ligado
             True
         )
         #self.fila.put(Evento.MODO_TRABALHO)
+        return "Modo trabalho ativado."
 
     def modo_relaxar(self):
         self._ativar_modo(
-            "gaming",
+            "relaxar",
             (255,120,40), # quente, relaxante
             False
         )
         #self.fila.put(Evento.MODO_RELAXAR)
+        return "Modo relaxar ativado."

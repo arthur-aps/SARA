@@ -1,5 +1,5 @@
-from enum import Enum, auto
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -41,6 +41,11 @@ class IaRespondeu:
     resposta: str
 
 
+@dataclass
+class FalaSistemaSolicitada:
+    texto: str
+
+
 
 @dataclass
 class TTSArquivando:
@@ -63,3 +68,4 @@ class TTSRodado:
 @dataclass
 class PeriodoMudou:
     periodo: str
+    periodo_anterior: str = "desconhecido"

@@ -1,17 +1,10 @@
-import time
-
 from eventos import (
     MicGravacaoIniciada,
-    MicGravacaoEncerrada,
     Wakeword,
-    FalaUsuarioIniciada,
-    FalaUsuarioFinalizada,
     FalaUsuarioArquivada,
     FalaUsuarioTranscrita,
     IaRespondeu,
-    TTSArquivando,
-    TTSArquivado,
-    TTSRodando,
+    FalaSistemaSolicitada,
     TTSRodado,
     PeriodoMudou
 )
@@ -28,6 +21,7 @@ class ConversationManager:
         self.ia = ia
 
         self.estado = Estado.ESPERA
+        self.estado_apos_tts = Estado.ESPERA
 
 
     def processar(self, evento):
@@ -66,6 +60,7 @@ class ConversationManager:
                 if resposta:
                     print(f"[ConversationManager] Resposta: {resposta}")
                     self.estado = Estado.IA_FALANDO
+                    self.estado_apos_tts = Estado.OUVINDO
                     self.audio.tts.falar_async(resposta)
                     return
 
@@ -75,13 +70,33 @@ class ConversationManager:
 
 
             case (Estado.IA_FALANDO, TTSRodado()):
-                self.estado = Estado.OUVINDO
-                self.audio.stt.gravar_async()
+                self.estado = self.estado_apos_tts
+
+                if self.estado == Estado.OUVINDO:
+                    self.audio.stt.gravar_async()
+                    return
+
+                if self.estado == Estado.ESPERA:
+                    return
+
                 return
 
 
-            case (Estado.ESPERA, PeriodoMudou(periodo)):
-                print(f"[ConversationManager] Período alterado, agora é: {periodo}")
+            case (Estado.ESPERA, FalaSistemaSolicitada(texto)):
+                if not texto.strip():
+                    return
+
+                self.estado = Estado.IA_FALANDO
+                self.estado_apos_tts = Estado.ESPERA
+                self.audio.tts.falar_async(texto)
+                return
+
+
+            case (Estado.ESPERA, PeriodoMudou(periodo, periodo_anterior)):
+                print(
+                    "[ConversationManager] Período alterado: "
+                    f"{periodo_anterior} -> {periodo}"
+                )
                 return
 
 
