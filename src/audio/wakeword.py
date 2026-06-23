@@ -1,30 +1,29 @@
+import threading
+
 import numpy as np
 from openwakeword.model import Model
-from collections import deque
-import soundfile as sf
-import threading
 
 from config.paths import WWMODELS
 
 from eventos import Wakeword
 
-from audio import AudioChunk
-
 
 class WakeWord:
 
     def __init__(self, fila_eventos, audio_bus):
-
         self.fila_eventos = fila_eventos
+        self.audio_bus = audio_bus
         self.fila_audio = audio_bus.subscribe()
 
-
-    def _aguardar(self):
-
-        modelos = Model([
+    def _criar_modelo(self):
+        return Model([
             str(WWMODELS / "sarah.onnx"),
             str(WWMODELS / "hey_sarah.onnx")
         ])
+
+    def _aguardar(self):
+        self.audio_bus.flush(self.fila_audio)
+        modelo = self._criar_modelo()
 
         print("[WakeWord] Esperando palavra de ativação...")
         while True:
@@ -35,11 +34,11 @@ class WakeWord:
 
             audio = np.frombuffer(buffer, dtype=np.int16)
 
-            pred = modelos.predict(audio)
+            pred = modelo.predict(audio)
 
             if (
-                pred["sarah"] > 0.4 or
-                pred["hey_sarah"] > 0.4
+                pred.get("sarah", 0) > 0.4 or
+                pred.get("hey_sarah", 0) > 0.4
             ):
                 print("[WakeWord] Ativado! Colocando na fila de eventos...")
                 self.fila_eventos.put(Wakeword())

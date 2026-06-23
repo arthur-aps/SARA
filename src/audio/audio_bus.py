@@ -1,4 +1,13 @@
-from queue import Queue, Empty
+from dataclasses import dataclass
+from queue import Empty, Queue
+
+import numpy as np
+
+
+@dataclass(slots=True)
+class AudioChunk:
+    samples: np.ndarray
+    rms: float
 
 
 class AudioBus:
@@ -7,13 +16,9 @@ class AudioBus:
         self.listeners = []
 
 
-    def subscribe(self) -> Queue[AudioChunk]:
+    def subscribe(self):
         fila = Queue()
-
         self.listeners.append(fila)
-
-        print("[AudioBus] Subscribe no bus realizado com sucesso.")
-
         return fila
 
 

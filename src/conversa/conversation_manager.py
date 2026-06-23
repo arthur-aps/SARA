@@ -1,7 +1,7 @@
 from eventos import (
     MicGravacaoIniciada,
     Wakeword,
-    FalaUsuarioArquivada,
+    FalaUsuarioFinalizada,
     FalaUsuarioTranscrita,
     IaRespondeu,
     FalaSistemaSolicitada,
@@ -33,13 +33,12 @@ class ConversationManager:
 
             case (Estado.ESPERA, Wakeword()):
                 self.estado = Estado.OUVINDO
-                self.audio.stt.gravar_async()
+                self.audio.ouvir_e_transcrever_async()
                 return
 
 
-            case (Estado.OUVINDO, FalaUsuarioArquivada(path)):
+            case (Estado.OUVINDO, FalaUsuarioFinalizada()):
                 self.estado = Estado.TRANSCREVENDO
-                self.audio.stt.transcrever_async()
                 return
 
 
@@ -47,7 +46,7 @@ class ConversationManager:
                 if not texto.strip():
                     print("[ConversationManager] Nenhuma fala detectada para transcrever.")
                     self.estado = Estado.ESPERA
-                    self.audio.wakeword.aguardar_async()
+                    self.audio.aguardar_wakeword_async()
                     return
                 
                 print(f"[ConversationManager] Pergunta: {texto}")
@@ -61,7 +60,7 @@ class ConversationManager:
                     print(f"[ConversationManager] Resposta: {resposta}")
                     self.estado = Estado.IA_FALANDO
                     self.estado_apos_tts = Estado.OUVINDO
-                    self.audio.tts.falar_async(resposta)
+                    self.audio.falar_async(resposta)
                     return
 
                 else:
@@ -73,7 +72,7 @@ class ConversationManager:
                 self.estado = self.estado_apos_tts
 
                 if self.estado == Estado.OUVINDO:
-                    self.audio.stt.gravar_async()
+                    self.audio.ouvir_e_transcrever_async()
                     return
 
                 if self.estado == Estado.ESPERA:
@@ -88,7 +87,7 @@ class ConversationManager:
 
                 self.estado = Estado.IA_FALANDO
                 self.estado_apos_tts = Estado.ESPERA
-                self.audio.tts.falar_async(texto)
+                self.audio.falar_async(texto)
                 return
 
 
@@ -106,10 +105,10 @@ class ConversationManager:
 
     def executar(self):
         print("[ConversationManager] Ligando o microfone...")
-        self.audio.microfone.iniciar()
+        self.audio.iniciar_microfone()
 
         print("[ConversationManager] Ativando espera de wakeword...")
-        self.audio.wakeword.aguardar_async()
+        self.audio.aguardar_wakeword_async()
 
         # escuta eventos
         while True:

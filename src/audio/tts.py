@@ -1,7 +1,8 @@
 import asyncio
 import subprocess
-import edge_tts
 import threading
+
+import edge_tts
 
 from config.paths import RECORDINGS
 
@@ -17,10 +18,20 @@ class TTS:
 
     def __init__(self, fila_eventos):
         self.fila_eventos = fila_eventos
-        self.RESPONSE_PATH = (RECORDINGS / "response.mp3")
+        self.response_path = RECORDINGS / "response.mp3"
+
+    def _tocar_arquivo(self, arquivo):
+        subprocess.run([
+            "ffplay",
+            "-nodisp",
+            "-autoexit",
+            "-loglevel",
+            "quiet",
+            str(arquivo)
+        ])
 
     async def _falar_async(self, texto):
-        arquivo = self.RESPONSE_PATH
+        arquivo = self.response_path
 
         self.fila_eventos.put(TTSArquivando())
         communicate = edge_tts.Communicate(
@@ -33,14 +44,7 @@ class TTS:
         self.fila_eventos.put(TTSArquivado())
 
         self.fila_eventos.put(TTSRodando())
-        subprocess.run([
-            "ffplay",
-            "-nodisp",
-            "-autoexit",
-            "-loglevel",
-            "quiet",
-            arquivo
-        ])
+        self._tocar_arquivo(arquivo)
         
         self.fila_eventos.put(TTSRodado())
 
@@ -54,4 +58,5 @@ class TTS:
             target=self._falar,
             args=(texto,),
             daemon=True
-        ).start()
+        )
+        self.thread_falar.start()

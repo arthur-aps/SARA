@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from pathlib import Path
 
 
 @dataclass
@@ -24,11 +23,7 @@ class FalaUsuarioIniciada:
 
 @dataclass
 class FalaUsuarioFinalizada:
-    caminho: Path
-
-@dataclass
-class FalaUsuarioArquivada:
-    caminho: Path
+    pass
 
 @dataclass
 class FalaUsuarioTranscrita:
