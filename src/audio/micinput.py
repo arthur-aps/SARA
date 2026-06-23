@@ -50,4 +50,4 @@ class Microfone:
         self.stream.stop_stream()
         self.stream.close()
         self.audio.terminate()
-        self.fila_eventos.put(Evento.MIC_GRAVACAO_ENCERRADA)
+        self.fila_eventos.put(MicGravacaoEncerrada)
