@@ -13,7 +13,7 @@ from eventos import (
     TTSArquivado,
     TTSRodando,
     TTSRodado,
-    PeriodoAtualizado
+    PeriodoMudou
 )
 
 from eventos import Estado
@@ -80,8 +80,9 @@ class ConversationManager:
                 return
 
 
-            case (Estado.ESPERA, PeriodoAtualizado(periodo)):
-                pass
+            case (Estado.ESPERA, PeriodoMudou(periodo)):
+                print(f"[ConversationManager] Período alterado, agora é: {periodo}")
+                return
 
 
             case _:

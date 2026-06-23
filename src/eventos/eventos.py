@@ -61,5 +61,5 @@ class TTSRodado:
 
 
 @dataclass
-class PeriodoAtualizado:
+class PeriodoMudou:
     periodo: str

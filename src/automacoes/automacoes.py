@@ -1,11 +1,13 @@
 import time
 import threading
 
+from eventos import PeriodoMudou
+
 
 class Automacoes:
     
-    def __init__(self, fila, situacao, situacao_manager, dispositivos):
-        self.fila = fila
+    def __init__(self, fila_eventos, situacao, situacao_manager, dispositivos):
+        self.fila_eventos = fila_eventos
         self.situacao = situacao
         self.situacao_manager = situacao_manager
         self.dispositivos = dispositivos
@@ -81,6 +83,8 @@ class Automacoes:
 
         if ambiente["periodo"] == ambiente["periodo_anterior"]:
             return
+
+        self.fila_eventos.put(PeriodoMudou(ambiente["periodo"]))
 
         print(
             f"[AUTOMAÇÃO] Mudança de período: "
