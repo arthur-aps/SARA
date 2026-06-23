@@ -14,11 +14,11 @@ fi
 ./venv/bin/pip install -r requirements.txt
 
 if [ ! -f .env ]; then
-    echo "Copiando para .env..."
+    echo "Criando .env..."
     cp .env.example .env
 fi
 
 if [ ! -f sara-esp-server/src/secrets.h ]; then
-    echo "Copiando para secrets.h..."
+    echo "Criando secrets.h..."
     cp secrets.h.example sara-esp-server/src/secrets.h
 fi
