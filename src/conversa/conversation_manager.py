@@ -81,6 +81,15 @@ class ConversationManager:
                 return
 
 
+            case (Estado.IA_FALANDO, Wakeword()):
+                print("[ConversationManager] Wakeword detectada durante fala. Interrompendo TTS...")
+                self.audio.parar_fala()
+                self.estado = Estado.OUVINDO
+                self.estado_apos_tts = Estado.OUVINDO
+                self.audio.ouvir_e_transcrever_async()
+                return
+
+
             case (Estado.ESPERA, FalaSistemaSolicitada(texto)):
                 if not texto.strip():
                     return

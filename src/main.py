@@ -1,7 +1,7 @@
 from audio import AudioManager
 from ia import Ia
 from situacao import Situacao, SituacaoManager, Serializer
-from automacoes import Automacoes, Dispositivos
+from automacoes import Automacoes, Dispositivos, LedSpeechSync
 from conversa import ConversationManager
 from config.paths import criar_diretorios 
 
@@ -15,9 +15,6 @@ def main():
     print("[main] Criando fila de eventos...")
     fila = Queue()
 
-    print("[main] Criando instância de AudioManager...")
-    audio = AudioManager(fila)
-
     print("[main] Criando instância de Situacao...")
     situacao = Situacao(fila)
 
@@ -29,6 +26,12 @@ def main():
 
     print("[main] Criando instância de Dispositivos...")
     dispositivos = Dispositivos(fila, situacao)
+
+    print("[main] Criando sincronizador de LEDs com voz...")
+    led_speech_sync = LedSpeechSync(situacao, dispositivos)
+
+    print("[main] Criando instância de AudioManager...")
+    audio = AudioManager(fila, tts_led_sync=led_speech_sync)
 
     print("[main] Criando instância de Ia...")
     ia = Ia(fila, situacao, dispositivos)

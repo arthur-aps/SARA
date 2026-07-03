@@ -7,13 +7,13 @@ from .tts import TTS
 
 class AudioManager:
 
-    def __init__(self, fila):
+    def __init__(self, fila, tts_led_sync=None):
         self._audio_bus = AudioBus()
         self.fila = fila
         self._microfone = Microfone(self.fila, self._audio_bus)
         self._wakeword = WakeWord(self.fila, self._audio_bus)
         self._stt = STT(self.fila, self._audio_bus)
-        self._tts = TTS(self.fila)
+        self._tts = TTS(self.fila, led_sync=tts_led_sync)
 
     def iniciar_microfone(self):
         self._microfone.iniciar()
@@ -29,3 +29,6 @@ class AudioManager:
 
     def falar_async(self, texto):
         self._tts.falar_async(texto)
+
+    def parar_fala(self):
+        self._tts.parar()

@@ -52,7 +52,7 @@ class Dispositivos:
         }
         #self.fila.put(Evento.OBTER_SITUACAO_CHAMADO)
 
-    def definir_cor(self, red, green, blue):
+    def _enviar_cor(self, red, green, blue):
         response = requests.get(f'http://{self.ESPip}/cor?r={red}&g={green}&b={blue}', timeout=3)
 
         if response.status_code == 200:
@@ -62,14 +62,23 @@ class Dispositivos:
                 "blue": blue
             }
 
+            return response.text
+        else:
+            return "Falha ao definir cor dos LEDs"
+
+    def definir_cor(self, red, green, blue):
+        resultado = self._enviar_cor(red, green, blue)
+
+        if resultado != "Falha ao definir cor dos LEDs":
             #self.fila.put(Evento.COR_LEDS_ALTERADA)
 
             self.situacao.logica["ambiente"]["modo"] = "personalizado"
             #self.fila.put(Evento.MODO_PERSONALIZADO)
 
-            return response.text
-        else:
-            return "Falha ao definir cor dos LEDs"
+        return resultado
+
+    def definir_cor_temporaria(self, red, green, blue):
+        return self._enviar_cor(red, green, blue)
 
 
     def _ativar_modo(self, nome, rgb, ligar_luz):
